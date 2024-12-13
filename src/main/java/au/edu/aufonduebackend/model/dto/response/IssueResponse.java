@@ -1,11 +1,14 @@
-// IssueResponse.java
+// File: src/main/java/au/edu/aufonduebackend/model/dto/response/IssueResponse.java
+
 package au.edu.aufonduebackend.model.dto.response;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class IssueResponse {
     private Long id;
     private String title;
@@ -19,5 +22,5 @@ public class IssueResponse {
     private List<String> photoUrls;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String reportedBy;
+    private UserResponse reportedBy; // Changed from String to UserResponse
 }

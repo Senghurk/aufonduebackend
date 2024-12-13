@@ -1,11 +1,15 @@
-// IssueRequest.java
+// File: src/main/java/au/edu/aufonduebackend/model/dto/request/IssueRequest.java
+
 package au.edu.aufonduebackend.model.dto.request;
 
-import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class IssueRequest {
     @NotBlank(message = "Title is required")
     private String title;
@@ -22,4 +26,5 @@ public class IssueRequest {
     private String location;
     private String category;
     private String priority;
+    private List<String> photoUrls;
 }

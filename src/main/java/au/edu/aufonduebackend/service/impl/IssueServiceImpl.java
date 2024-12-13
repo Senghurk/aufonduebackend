@@ -4,6 +4,7 @@ package au.edu.aufonduebackend.service.impl;
 
 import au.edu.aufonduebackend.model.dto.request.IssueRequest;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
+import au.edu.aufonduebackend.model.dto.response.UserResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
 import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.service.IssueService;
@@ -114,7 +115,15 @@ public class IssueServiceImpl implements IssueService {
         response.setPhotoUrls(issue.getPhotoUrls());
         response.setCreatedAt(issue.getCreatedAt());
         response.setUpdatedAt(issue.getUpdatedAt());
-        response.setReportedBy(issue.getReportedBy() != null ? issue.getReportedBy().getUsername() : null);
+
+        if (issue.getReportedBy() != null) {
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(issue.getReportedBy().getId());
+            userResponse.setUsername(issue.getReportedBy().getUsername());
+            userResponse.setEmail(issue.getReportedBy().getEmail());
+            response.setReportedBy(userResponse);
+        }
+
         return response;
     }
 }

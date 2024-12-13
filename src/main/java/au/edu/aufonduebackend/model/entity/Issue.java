@@ -1,9 +1,10 @@
-// File: src/main/java/com/aufondue/model/entity/Issue.java
+// File: src/main/java/au/edu/aufonduebackend/model/entity/Issue.java
 
 package au.edu.aufonduebackend.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,7 +14,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "issues")
-@Data
+@Getter
+@Setter
 public class Issue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +40,7 @@ public class Issue {
     private String priority;
 
     @Column(nullable = false)
-    private String status = "PENDING";  // PENDING, IN_PROGRESS, RESOLVED, CLOSED
+    private String status = "PENDING";
 
     @ElementCollection
     @CollectionTable(name = "issue_photos", joinColumns = @JoinColumn(name = "issue_id"))
