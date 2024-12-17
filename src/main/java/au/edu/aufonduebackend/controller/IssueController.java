@@ -15,12 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/issues")
+@CrossOrigin
 public class IssueController {
 
     @Autowired
     private IssueService issueService;
 
-    @PostMapping
+    @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse<IssueResponse>> createIssue(
             @RequestPart("issue") IssueRequest request,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
