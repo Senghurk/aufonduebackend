@@ -1,5 +1,3 @@
-// File: src/main/java/au/edu/aufonduebackend/model/entity/Issue.java
-
 package au.edu.aufonduebackend.model.entity;
 
 import jakarta.persistence.*;
@@ -21,23 +19,18 @@ public class Issue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
-
     @Column(nullable = false, length = 1000)
     private String description;
 
-    @Column(nullable = false)
+    // Location fields
     private Double latitude;
-
-    @Column(nullable = false)
     private Double longitude;
+    private String customLocation;
 
-    private String location;
+    @Column(name = "using_custom_location")
+    private Boolean usingCustomLocation = false;  // Use non-primitive to allow null
 
     private String category;
-
-    private String priority;
 
     @Column(nullable = false)
     private String status = "PENDING";

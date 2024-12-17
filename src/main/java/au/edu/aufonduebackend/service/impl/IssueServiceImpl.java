@@ -34,13 +34,27 @@ public class IssueServiceImpl implements IssueService {
 
         // Create new issue
         Issue issue = new Issue();
-        issue.setTitle(request.getTitle());
         issue.setDescription(request.getDescription());
-        issue.setLatitude(request.getLatitude());
-        issue.setLongitude(request.getLongitude());
-        issue.setLocation(request.getLocation());
-        issue.setCategory(request.getCategory());
-        issue.setPriority(request.getPriority());
+
+        // Handle location based on usingCustomLocation
+        if (request.isUsingCustomLocation()) {
+            issue.setCustomLocation(request.getCustomLocation());
+            issue.setLatitude(null);
+            issue.setLongitude(null);
+        } else {
+            issue.setLatitude(request.getLatitude());
+            issue.setLongitude(request.getLongitude());
+            issue.setCustomLocation(null);
+        }
+        issue.setUsingCustomLocation(request.isUsingCustomLocation());
+
+        // Handle category
+        if ("Custom".equals(request.getCategory())) {
+            issue.setCategory(request.getCustomCategory());
+        } else {
+            issue.setCategory(request.getCategory());
+        }
+
         issue.setStatus("PENDING"); // Default status
         issue.setPhotoUrls(new ArrayList<>()); // Initialize empty list
 
@@ -96,13 +110,24 @@ public class IssueServiceImpl implements IssueService {
                 .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + id));
 
         // Update fields
-        issue.setTitle(request.getTitle());
         issue.setDescription(request.getDescription());
-        issue.setLatitude(request.getLatitude());
-        issue.setLongitude(request.getLongitude());
-        issue.setLocation(request.getLocation());
-        issue.setCategory(request.getCategory());
-        issue.setPriority(request.getPriority());
+
+        if (request.isUsingCustomLocation()) {
+            issue.setCustomLocation(request.getCustomLocation());
+            issue.setLatitude(null);
+            issue.setLongitude(null);
+        } else {
+            issue.setLatitude(request.getLatitude());
+            issue.setLongitude(request.getLongitude());
+            issue.setCustomLocation(null);
+        }
+        issue.setUsingCustomLocation(request.isUsingCustomLocation());
+
+        if ("Custom".equals(request.getCategory())) {
+            issue.setCategory(request.getCustomCategory());
+        } else {
+            issue.setCategory(request.getCategory());
+        }
 
         // Save and return
         Issue updatedIssue = issueRepository.save(issue);
@@ -150,13 +175,12 @@ public class IssueServiceImpl implements IssueService {
     private IssueResponse convertToResponse(Issue issue) {
         IssueResponse response = new IssueResponse();
         response.setId(issue.getId());
-        response.setTitle(issue.getTitle());
         response.setDescription(issue.getDescription());
         response.setLatitude(issue.getLatitude());
         response.setLongitude(issue.getLongitude());
-        response.setLocation(issue.getLocation());
+        response.setCustomLocation(issue.getCustomLocation());
+        response.setUsingCustomLocation(issue.getUsingCustomLocation());
         response.setCategory(issue.getCategory());
-        response.setPriority(issue.getPriority());
         response.setStatus(issue.getStatus());
         response.setPhotoUrls(issue.getPhotoUrls() != null ? issue.getPhotoUrls() : new ArrayList<>());
         response.setCreatedAt(issue.getCreatedAt());
@@ -176,17 +200,27 @@ public class IssueServiceImpl implements IssueService {
     private void validateIssueRequest(IssueRequest request) {
         List<String> errors = new ArrayList<>();
 
-        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-            errors.add("Title is required");
-        }
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add("Description is required");
         }
-        if (request.getLatitude() == null) {
-            errors.add("Latitude is required");
+
+        // Location validation
+        if (request.isUsingCustomLocation()) {
+            if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
+                errors.add("Custom location is required when using custom location");
+            }
+        } else {
+            if (request.getLatitude() == null || request.getLongitude() == null) {
+                errors.add("Latitude and longitude are required when not using custom location");
+            }
         }
-        if (request.getLongitude() == null) {
-            errors.add("Longitude is required");
+
+        // Category validation
+        if (request.getCategory() == null || request.getCategory().trim().isEmpty()) {
+            errors.add("Category is required");
+        } else if ("Custom".equals(request.getCategory()) &&
+                (request.getCustomCategory() == null || request.getCustomCategory().trim().isEmpty())) {
+            errors.add("Custom category description is required when using custom category");
         }
 
         if (!errors.isEmpty()) {

@@ -3,7 +3,6 @@
 package au.edu.aufonduebackend.model.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
@@ -12,19 +11,18 @@ import java.util.List;
 @Setter
 public class IssueRequest {
     @NotBlank(message = "Title is required")
-    private String title;
+    private String title;  // Added this field
 
     @NotBlank(message = "Description is required")
     private String description;
 
-    @NotNull(message = "Latitude is required")
+    // Location fields - either (latitude + longitude) OR customLocation must be provided
     private Double latitude;
-
-    @NotNull(message = "Longitude is required")
     private Double longitude;
+    private String customLocation;
+    private boolean isUsingCustomLocation;
 
-    private String location;
     private String category;
-    private String priority;
+    private String customCategory;
     private List<String> photoUrls;
 }
