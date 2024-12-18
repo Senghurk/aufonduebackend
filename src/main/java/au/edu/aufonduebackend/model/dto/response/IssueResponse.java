@@ -1,3 +1,4 @@
+// File: IssueResponse.java
 package au.edu.aufonduebackend.model.dto.response;
 
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class IssueResponse {
     private Double latitude;
     private Double longitude;
     private String customLocation;
-    private Boolean usingCustomLocation;  // Match the entity field name
+    private Boolean usingCustomLocation;
     private String category;
     private String status;
     private List<String> photoUrls;

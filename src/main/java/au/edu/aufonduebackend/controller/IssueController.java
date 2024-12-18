@@ -6,6 +6,7 @@ import au.edu.aufonduebackend.model.dto.request.IssueRequest;
 import au.edu.aufonduebackend.model.dto.response.ApiResponse;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.service.IssueService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +24,16 @@ public class IssueController {
 
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse<IssueResponse>> createIssue(
-            @RequestPart("issue") IssueRequest request,
+            @RequestPart("issue") String issueJson,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
-        IssueResponse response = issueService.createIssue(request, photos);
-        return ResponseEntity.ok(ApiResponse.success(response, "Issue created successfully"));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            IssueRequest request = mapper.readValue(issueJson, IssueRequest.class);
+            IssueResponse response = issueService.createIssue(request, photos);
+            return ResponseEntity.ok(ApiResponse.success(response, "Issue created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     @GetMapping

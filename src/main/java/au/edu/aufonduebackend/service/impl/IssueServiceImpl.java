@@ -198,20 +198,35 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private void validateIssueRequest(IssueRequest request) {
+        System.out.println("Validating request: " +
+                "isUsingCustomLocation=" + request.isUsingCustomLocation() +
+                ", latitude=" + request.getLatitude() +
+                ", longitude=" + request.getLongitude() +
+                ", customLocation=" + request.getCustomLocation());
+
         List<String> errors = new ArrayList<>();
 
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add("Description is required");
         }
 
-        // Location validation
+        // Location validation with improved debugging
         if (request.isUsingCustomLocation()) {
             if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
                 errors.add("Custom location is required when using custom location");
             }
+            // For debugging - log when using custom location
+            System.out.println("Using custom location: " + request.getCustomLocation());
         } else {
             if (request.getLatitude() == null || request.getLongitude() == null) {
                 errors.add("Latitude and longitude are required when not using custom location");
+                // For debugging - log the missing coordinates
+                System.out.println("Missing coordinates - latitude: " + request.getLatitude() +
+                        ", longitude: " + request.getLongitude());
+            } else {
+                // For debugging - log valid coordinates
+                System.out.println("Valid coordinates received - latitude: " + request.getLatitude() +
+                        ", longitude: " + request.getLongitude());
             }
         }
 
@@ -224,7 +239,11 @@ public class IssueServiceImpl implements IssueService {
         }
 
         if (!errors.isEmpty()) {
-            throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
+            String errorMessage = "Invalid issue request: " + String.join(", ", errors);
+            System.out.println("Validation failed: " + errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        } else {
+            System.out.println("Validation successful");
         }
     }
 }

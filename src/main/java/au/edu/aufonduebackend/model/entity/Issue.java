@@ -1,3 +1,4 @@
+// File: Issue.java
 package au.edu.aufonduebackend.model.entity;
 
 import jakarta.persistence.*;
@@ -28,7 +29,7 @@ public class Issue {
     private String customLocation;
 
     @Column(name = "using_custom_location")
-    private Boolean usingCustomLocation = false;  // Use non-primitive to allow null
+    private Boolean usingCustomLocation = false;
 
     private String category;
 
