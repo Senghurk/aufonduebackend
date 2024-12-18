@@ -7,7 +7,7 @@ AU Fondue Backend is a Spring Boot application that serves as the server-side co
 - Java Development Kit (JDK) 17 or later
 - Maven 3.6.3 or later
 - PostgreSQL 12 or later
-- Docker (optional, for containerization)
+- Docker (for containerization)
 
 ## Tech Stack
 - Spring Boot 3.3.6
