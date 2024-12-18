@@ -1,5 +1,3 @@
-// File: src/main/java/au/edu/aufonduebackend/controller/IssueController.java
-
 package au.edu.aufonduebackend.controller;
 
 import au.edu.aufonduebackend.model.dto.request.IssueRequest;
@@ -34,6 +32,27 @@ public class IssueController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
+    }
+
+    // New endpoint for user submitted issues
+    @GetMapping("/user/{userId}/submitted")
+    public ResponseEntity<ApiResponse<List<IssueResponse>>> getUserSubmittedIssues(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status) {
+        List<IssueResponse> issues = issueService.getUserSubmittedIssues(userId, page, size, status);
+        return ResponseEntity.ok(ApiResponse.success(issues, "User submitted issues retrieved successfully"));
+    }
+
+    // New endpoint for tracking all issues
+    @GetMapping("/tracking")
+    public ResponseEntity<ApiResponse<List<IssueResponse>>> getAllIssuesTracking(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status) {
+        List<IssueResponse> issues = issueService.getAllIssuesTracking(page, size, status);
+        return ResponseEntity.ok(ApiResponse.success(issues, "All tracked issues retrieved successfully"));
     }
 
     @GetMapping

@@ -29,14 +29,11 @@ public class IssueServiceImpl implements IssueService {
     @Override
     @Transactional
     public IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos) {
-        // Input validation
         validateIssueRequest(request);
 
-        // Create new issue
         Issue issue = new Issue();
         issue.setDescription(request.getDescription());
 
-        // Handle location based on usingCustomLocation
         if (request.isUsingCustomLocation()) {
             issue.setCustomLocation(request.getCustomLocation());
             issue.setLatitude(null);
@@ -48,17 +45,15 @@ public class IssueServiceImpl implements IssueService {
         }
         issue.setUsingCustomLocation(request.isUsingCustomLocation());
 
-        // Handle category
         if ("Custom".equals(request.getCategory())) {
             issue.setCategory(request.getCustomCategory());
         } else {
             issue.setCategory(request.getCategory());
         }
 
-        issue.setStatus("PENDING"); // Default status
-        issue.setPhotoUrls(new ArrayList<>()); // Initialize empty list
+        issue.setStatus("PENDING");
+        issue.setPhotoUrls(new ArrayList<>());
 
-        // Handle photo uploads if provided
         if (photos != null && !photos.isEmpty()) {
             try {
                 List<String> photoUrls = photos.stream()
@@ -70,9 +65,32 @@ public class IssueServiceImpl implements IssueService {
             }
         }
 
-        // Save and return
         Issue savedIssue = issueRepository.save(issue);
         return convertToResponse(savedIssue);
+    }
+
+    @Override
+    public List<IssueResponse> getUserSubmittedIssues(Long userId, int page, int size, String status) {
+        try {
+            return issueRepository.findUserIssues(userId, status, page * size, size)
+                    .stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<IssueResponse> getAllIssuesTracking(int page, int size, String status) {
+        try {
+            return issueRepository.findAllIssues(status, page * size, size)
+                    .stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -103,13 +121,11 @@ public class IssueServiceImpl implements IssueService {
     @Override
     @Transactional
     public IssueResponse updateIssue(Long id, IssueRequest request) {
-        // Input validation
         validateIssueRequest(request);
 
         Issue issue = issueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + id));
 
-        // Update fields
         issue.setDescription(request.getDescription());
 
         if (request.isUsingCustomLocation()) {
@@ -129,7 +145,6 @@ public class IssueServiceImpl implements IssueService {
             issue.setCategory(request.getCategory());
         }
 
-        // Save and return
         Issue updatedIssue = issueRepository.save(issue);
         return convertToResponse(updatedIssue);
     }
@@ -140,13 +155,11 @@ public class IssueServiceImpl implements IssueService {
         Issue issue = issueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + id));
 
-        // Delete associated photos first
         if (issue.getPhotoUrls() != null && !issue.getPhotoUrls().isEmpty()) {
             for (String photoUrl : issue.getPhotoUrls()) {
                 try {
                     storageService.deleteFile(photoUrl);
                 } catch (Exception e) {
-                    // Log error but continue with deletion
                     System.err.println("Error deleting photo: " + photoUrl);
                 }
             }
@@ -198,39 +211,22 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private void validateIssueRequest(IssueRequest request) {
-        System.out.println("Validating request: " +
-                "isUsingCustomLocation=" + request.isUsingCustomLocation() +
-                ", latitude=" + request.getLatitude() +
-                ", longitude=" + request.getLongitude() +
-                ", customLocation=" + request.getCustomLocation());
-
         List<String> errors = new ArrayList<>();
 
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add("Description is required");
         }
 
-        // Location validation with improved debugging
         if (request.isUsingCustomLocation()) {
             if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
                 errors.add("Custom location is required when using custom location");
             }
-            // For debugging - log when using custom location
-            System.out.println("Using custom location: " + request.getCustomLocation());
         } else {
             if (request.getLatitude() == null || request.getLongitude() == null) {
                 errors.add("Latitude and longitude are required when not using custom location");
-                // For debugging - log the missing coordinates
-                System.out.println("Missing coordinates - latitude: " + request.getLatitude() +
-                        ", longitude: " + request.getLongitude());
-            } else {
-                // For debugging - log valid coordinates
-                System.out.println("Valid coordinates received - latitude: " + request.getLatitude() +
-                        ", longitude: " + request.getLongitude());
             }
         }
 
-        // Category validation
         if (request.getCategory() == null || request.getCategory().trim().isEmpty()) {
             errors.add("Category is required");
         } else if ("Custom".equals(request.getCategory()) &&
@@ -239,11 +235,7 @@ public class IssueServiceImpl implements IssueService {
         }
 
         if (!errors.isEmpty()) {
-            String errorMessage = "Invalid issue request: " + String.join(", ", errors);
-            System.out.println("Validation failed: " + errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-        } else {
-            System.out.println("Validation successful");
+            throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
         }
     }
 }
