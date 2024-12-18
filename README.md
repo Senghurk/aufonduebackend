@@ -67,23 +67,6 @@ After starting the application, access the Swagger UI documentation at:
 - `DELETE /api/issues/{id}` - Delete an issue
 - `GET /api/issues/nearby` - Get issues near a location
 
-## Project Structure
-```
-src/
-├── main/
-│   ├── java/
-│   │   └── au.edu.aufonduebackend/
-│   │       ├── config/
-│   │       ├── controller/
-│   │       ├── model/
-│   │       │   ├── dto/
-│   │       │   └── entity/
-│   │       ├── repository/
-│   │       └── service/
-│   └── resources/
-│       └── application.properties
-```
-
 ## Security
 The application uses Spring Security with the following features:
 - CORS configuration
@@ -92,19 +75,6 @@ The application uses Spring Security with the following features:
 - Azure Active Directory integration (planned)
 
 ## Development Guidelines
-
-### Code Style
-- Follow Java naming conventions
-- Use meaningful variable and method names
-- Include JavaDoc comments for public methods
-- Follow the SOLID principles
-
-### Git Workflow
-1. Create a feature branch from `develop`
-2. Make changes and commit with meaningful messages
-3. Create a pull request to merge into `develop`
-4. Request code review
-5. Merge after approval
 
 ## Deployment
 
@@ -132,9 +102,9 @@ docker run -p 8080:8080 aufondue-backend
 5. Create a Pull Request
 
 ## License
-This project is part of AU Fondue, a senior project at Assumption University.
+This project is part of AU Fondue, a Senior project - 1 at Assumption University.
 
 ## Contact
 For questions or support, contact the development team:
-- Project Supervisor: [Name]
-- Development Team: [Names]
+- Developer/Contributor : [Sai Oan Hseng Hurk]
+- Team : [UniMend]
