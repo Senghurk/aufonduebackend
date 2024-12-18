@@ -1,4 +1,4 @@
-# AU Fondue Backend [Senior Project - 1]
+# AU Fondue Backend [ Senior Project - 1 ]
 
 ## Overview
 AU Fondue Backend is a Spring Boot application that serves as the server-side component of the AU Fondue campus maintenance reporting system. It provides RESTful APIs for the mobile application and web admin panel, handling issue reporting, and file storage.
@@ -106,5 +106,5 @@ This project is part of AU Fondue, a Senior project - 1 at Assumption University
 
 ## Contact
 For questions or support, contact the development team:
-- Developer/Contributor : [Sai Oan Hseng Hurk]
-- Team : [UniMend]
+- Developer/Contributor : [ Sai Oan Hseng Hurk ]
+- Team : [ UniMend ] 
