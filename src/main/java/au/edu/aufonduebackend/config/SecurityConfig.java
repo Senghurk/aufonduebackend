@@ -15,7 +15,7 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import java.util.Arrays;
 
 @Configuration
-@Profile("dev")
+//@Profile("dev")
 public class SecurityConfig {
 
     @Bean
@@ -34,8 +34,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/issues/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/test").permitAll()
+                        .anyRequest().permitAll()
 
-                        .anyRequest().authenticated()
+//                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

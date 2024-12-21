@@ -1,0 +1,58 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.6)
+
+2024-12-21T13:02:40.356Z  INFO 1 --- [aufonduebackend] [           main] a.e.a.AufonduebackendApplication         : Starting AufonduebackendApplication v0.0.1-SNAPSHOT using Java 24-ea with PID 1 (/app/app.jar started by root in /app)
+2024-12-21T13:02:40.359Z  INFO 1 --- [aufonduebackend] [           main] a.e.a.AufonduebackendApplication         : The following 1 profile is active: "prod"
+2024-12-21T13:02:40.952Z  INFO 1 --- [aufonduebackend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-12-21T13:02:41.047Z  INFO 1 --- [aufonduebackend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 89 ms. Found 1 JPA repository interface.
+2024-12-21T13:02:41.465Z  WARN 1 --- [aufonduebackend] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'com.azure.spring.cloud.autoconfigure.implementation.jdbc.AzureJdbcAutoConfiguration' of type [com.azure.spring.cloud.autoconfigure.implementation.jdbc.AzureJdbcAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [jdbcConfigurationPropertiesBeanPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2024-12-21T13:02:41.833Z  INFO 1 --- [aufonduebackend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2024-12-21T13:02:41.851Z  INFO 1 --- [aufonduebackend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2024-12-21T13:02:41.851Z  INFO 1 --- [aufonduebackend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.33]
+2024-12-21T13:02:41.890Z  INFO 1 --- [aufonduebackend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2024-12-21T13:02:41.891Z  INFO 1 --- [aufonduebackend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1460 ms
+2024-12-21T13:02:42.100Z  INFO 1 --- [aufonduebackend] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-12-21T13:02:42.140Z  INFO 1 --- [aufonduebackend] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2024-12-21T13:02:42.157Z  INFO 1 --- [aufonduebackend] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2024-12-21T13:02:42.341Z  INFO 1 --- [aufonduebackend] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-12-21T13:02:42.358Z  INFO 1 --- [aufonduebackend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-12-21T13:02:43.837Z  INFO 1 --- [aufonduebackend] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@76fc5687
+2024-12-21T13:02:43.838Z  INFO 1 --- [aufonduebackend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-12-21T13:02:43.905Z  WARN 1 --- [aufonduebackend] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2024-12-21T13:02:45.139Z  INFO 1 --- [aufonduebackend] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-12-21T13:02:45.914Z  INFO 1 --- [aufonduebackend] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-12-21T13:02:46.127Z  INFO 1 --- [aufonduebackend] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-12-21T13:02:46.354Z  WARN 1 --- [aufonduebackend] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-12-21T13:02:46.417Z  INFO 1 --- [aufonduebackend] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2024-12-21T13:02:46.846Z  INFO 1 --- [aufonduebackend] [           main] c.a.c.h.n.implementation.NettyUtility    : {"az.sdk.message":"The following Netty versions were found on the classpath and have a mismatch with the versions used by azure-core-http-netty. If your application runs without issue this message can be ignored, otherwise please align the Netty versions used in your application. For more information, see https://aka.ms/azsdk/java/dependency/troubleshoot.","azure-netty-version":"4.1.110.Final","azure-netty-native-version":"2.0.65.Final","classpath-netty-version-io.netty:netty-common":"4.1.115.Final","classpath-netty-version-io.netty:netty-handler":"4.1.115.Final","classpath-netty-version-io.netty:netty-handler-proxy":"4.1.115.Final","classpath-netty-version-io.netty:netty-buffer":"4.1.115.Final","classpath-netty-version-io.netty:netty-codec":"4.1.115.Final","classpath-netty-version-io.netty:netty-codec-http":"4.1.115.Final","classpath-netty-version-io.netty:netty-codec-http2":"4.1.115.Final","classpath-netty-version-io.netty:netty-transport-native-unix-common":"4.1.115.Final","classpath-netty-version-io.netty:netty-transport-native-epoll":"4.1.115.Final","classpath-netty-version-io.netty:netty-transport-native-kqueue":"4.1.115.Final","classpath-native-netty-version-io.netty:netty-tcnative-boringssl-static":"2.0.69.Final"}
+2024-12-21T13:02:47.162Z  INFO 1 --- [aufonduebackend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2024-12-21T13:02:47.173Z  INFO 1 --- [aufonduebackend] [           main] a.e.a.AufonduebackendApplication         : Started AufonduebackendApplication in 7.246 seconds (process running for 6.894)
+2024-12-21T13:02:50.609Z  INFO 1 --- [aufonduebackend] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-12-21T13:02:50.609Z  INFO 1 --- [aufonduebackend] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2024-12-21T13:02:50.610Z  INFO 1 --- [aufonduebackend] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+Hibernate: 
+    select
+        i1_0.id,
+        i1_0.category,
+        i1_0.created_at,
+        i1_0.custom_location,
+        i1_0.description,
+        i1_0.latitude,
+        i1_0.longitude,
+        i1_0.reported_by_user_id,
+        i1_0.status,
+        i1_0.updated_at,
+        i1_0.using_custom_location 
+    from
+        issues i1_0 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
