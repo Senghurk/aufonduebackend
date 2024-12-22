@@ -4,9 +4,11 @@ import au.edu.aufonduebackend.model.dto.request.IssueRequest;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.model.dto.response.UserResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
+import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.StorageService;
+import au.edu.aufonduebackend.service.UserService;
 import au.edu.aufonduebackend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -25,14 +27,21 @@ public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
     private final StorageService storageService;
+    private final UserService userService;
 
     @Override
     @Transactional
     public IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos) {
         validateIssueRequest(request);
 
+        // Get or create user from email
+        String email = request.getUserEmail();
+        String username = email.substring(0, email.indexOf("@")); // Extract username from email
+        User user = userService.createUserAfterAuthentication(username, email);
+
         Issue issue = new Issue();
         issue.setDescription(request.getDescription());
+        issue.setReportedBy(user);
 
         if (request.isUsingCustomLocation()) {
             issue.setCustomLocation(request.getCustomLocation());
@@ -215,6 +224,12 @@ public class IssueServiceImpl implements IssueService {
 
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add("Description is required");
+        }
+
+        if (request.getUserEmail() == null || request.getUserEmail().trim().isEmpty()) {
+            errors.add("User email is required");
+        } else if (!request.getUserEmail().toLowerCase().endsWith("@au.edu")) {
+            errors.add("Only AU email addresses are allowed");
         }
 
         if (request.isUsingCustomLocation()) {

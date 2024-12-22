@@ -1,12 +1,8 @@
-// File: src/main/java/au/edu/aufonduebackend/model/entity/User.java
-
 package au.edu.aufonduebackend.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,17 +16,22 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
-    private String password;
-
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String role;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    // Optional: Add a constructor that takes required fields
+    public User() {}
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
+        this.role = "USER";  // Default role
+    }
 }
