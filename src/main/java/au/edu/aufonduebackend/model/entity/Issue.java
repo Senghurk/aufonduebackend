@@ -50,4 +50,13 @@ public class Issue {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by_user_id")
     private User reportedBy;
+
+
+    //Additions for admin
+    private Boolean assigned = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_staff_id")
+    private Staff assignedTo;
+
+
 }

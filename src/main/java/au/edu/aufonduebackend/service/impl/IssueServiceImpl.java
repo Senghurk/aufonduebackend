@@ -2,9 +2,13 @@ package au.edu.aufonduebackend.service.impl;
 
 import au.edu.aufonduebackend.model.dto.request.IssueRequest;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
+import au.edu.aufonduebackend.model.dto.response.StaffResponse;
 import au.edu.aufonduebackend.model.dto.response.UserResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
+import au.edu.aufonduebackend.model.entity.Staff;
+import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.repository.IssueRepository;
+import au.edu.aufonduebackend.repository.StaffRepository;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.StorageService;
 import au.edu.aufonduebackend.exception.ResourceNotFoundException;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
+    private final StaffRepository staffRepository;
     private final StorageService storageService;
 
     @Override
@@ -198,6 +203,7 @@ public class IssueServiceImpl implements IssueService {
         response.setPhotoUrls(issue.getPhotoUrls() != null ? issue.getPhotoUrls() : new ArrayList<>());
         response.setCreatedAt(issue.getCreatedAt());
         response.setUpdatedAt(issue.getUpdatedAt());
+        response.setAssigned(issue.getAssigned());
 
         if (issue.getReportedBy() != null) {
             UserResponse userResponse = new UserResponse();
@@ -205,6 +211,14 @@ public class IssueServiceImpl implements IssueService {
             userResponse.setUsername(issue.getReportedBy().getUsername());
             userResponse.setEmail(issue.getReportedBy().getEmail());
             response.setReportedBy(userResponse);
+        }
+
+        if (issue.getAssignedTo() != null) {
+            StaffResponse staffResponse = new StaffResponse();
+            staffResponse.setId(issue.getAssignedTo().getId());
+            staffResponse.setName(issue.getAssignedTo().getName());
+            staffResponse.setEmail(issue.getAssignedTo().getEmail());
+            response.setAssignedTo(staffResponse);
         }
 
         return response;
@@ -238,4 +252,80 @@ public class IssueServiceImpl implements IssueService {
             throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
         }
     }
+
+
+
+    //TEST EDIT BY MATT
+    @Override
+    public void addMockData() {
+        List<Issue> mockIssues = List.of(
+                createMockIssue("Broken Tap", 40.7128, -74.0060, "Toilet", "Plumbing"),
+                createMockIssue("Broken Chair", 34.0522, -118.2437, "VMES1003", "Maintenance"),
+                createMockIssue("Plug Not Working", 51.5074, -0.1278, "VMES0101", "ELectrical")
+        );
+
+        issueRepository.saveAll(mockIssues);
+    }
+
+
+
+
+    private Issue createMockIssue(String description, double latitude, double longitude, String location, String category) {
+        Issue issue = new Issue();
+        issue.setDescription(description);
+        issue.setLatitude(latitude);
+        issue.setLongitude(longitude);
+        issue.setCustomLocation(location);
+        issue.setCategory(category);
+        issue.setStatus("PENDING");
+        issue.setUsingCustomLocation(true);
+        issue.setPhotoUrls(List.of("http://example.com/photo1.jpg", "http://example.com/photo2.jpg"));
+
+        User mockUser = new User();
+        mockUser.setId(1L); // Replace with a valid user ID from your database
+        issue.setReportedBy(mockUser);
+
+        return issue;
+    }
+
+
+    @Override
+    public void assignIssueToStaff(Long issueId, Long staffId) {
+        // Fetch the issue by ID
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + issueId));
+
+        // Fetch the staff by ID
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+
+        // Update the issue
+        issue.setAssigned(true);
+        issue.setAssignedTo(staff);
+        issueRepository.save(issue); // Save the updated issue
+    }
+
+    @Override
+    public List<IssueResponse> getUnassignedIssues(int page, int size) {
+        List<Issue> unassignedIssues = issueRepository.findByAssignedFalse();
+        return unassignedIssues.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IssueResponse> getAssignedIssues(int page, int size) {
+        List<Issue> assignedIssues = issueRepository.findByAssignedTrue();
+        return assignedIssues.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public IssueResponse getUnassignedIssueByID(Long issueId) {
+        Issue issue = issueRepository.getUnassignedIssueByID(issueId);
+        return convertToResponse(issue);
+    }
+
+
 }
