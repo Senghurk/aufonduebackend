@@ -25,6 +25,12 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public String uploadFile(MultipartFile file) {
         try {
+            // Validate file type
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new RuntimeException("Invalid file type. Only images are allowed.");
+            }
+
             String filename = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
             Files.copy(file.getInputStream(), this.root.resolve(filename));
             return "/uploads/" + filename;

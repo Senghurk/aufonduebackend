@@ -20,8 +20,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable());
         http
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(Arrays.asList("*"));
@@ -32,9 +34,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/issues").permitAll()
                         .requestMatchers("/api/issues/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/issues/updates").permitAll()
+                        .requestMatchers("/api/issues/updates").permitAll()
                         .requestMatchers("/api/staff/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/test").permitAll()
+
+
 
                         .anyRequest().authenticated()
                 )

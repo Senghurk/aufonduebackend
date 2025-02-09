@@ -1,28 +1,47 @@
 package au.edu.aufonduebackend.controller;
 
 
+import au.edu.aufonduebackend.model.dto.request.UpdateRequest;
+import au.edu.aufonduebackend.model.dto.response.ApiResponse;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
+import au.edu.aufonduebackend.model.dto.response.UpdateResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
 import au.edu.aufonduebackend.model.entity.Staff;
+import au.edu.aufonduebackend.model.entity.Update;
 import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.repository.IssueRepository;
+import au.edu.aufonduebackend.repository.UpdateRepository;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.StaffService;
+import au.edu.aufonduebackend.service.UpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 
 @Controller
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/issues")
 public class AdminIssueController {
     @Autowired
     public IssueService issueService;
     public StaffService staffService;
+
+    @Autowired
+    public UpdateService updateService;
+
+    public UpdateRepository updateRepository;
 
     @GetMapping("/reports")
     public ResponseEntity<List<IssueResponse>> getAllReports(
@@ -94,5 +113,34 @@ public class AdminIssueController {
     public ResponseEntity<IssueResponse> getUnassignedIssueByID(@PathVariable Long id) {
         IssueResponse unassignedIssue = issueService.getUnassignedIssueByID(id);
         return ResponseEntity.ok(unassignedIssue);
+    }
+
+
+
+
+
+    // For admin updating process
+    @PostMapping("updates")
+    public ResponseEntity<UpdateResponse> createUpdate(
+            @ModelAttribute UpdateRequest request,
+            @RequestParam(value = "photos", required = false) List<MultipartFile> photos) {
+
+        UpdateResponse response = updateService.createUpdate(request, photos);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("updates/{updateId}/status")
+    public ResponseEntity<UpdateResponse> changeUpdateStatus(
+            @PathVariable Long updateId,
+            @RequestParam String newStatus) {
+
+        UpdateResponse response = updateService.changeUpdateStatus(updateId, newStatus);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{issueId}/updates")
+    public ResponseEntity<List<UpdateResponse>> getUpdatesByIssue(@PathVariable Long issueId) {
+        List<UpdateResponse> updates = updateService.getUpdatesByIssueId(issueId);
+        return ResponseEntity.ok(updates);
     }
 }
