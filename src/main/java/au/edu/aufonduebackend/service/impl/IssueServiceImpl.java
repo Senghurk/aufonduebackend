@@ -256,37 +256,11 @@ public class IssueServiceImpl implements IssueService {
 
 
     //TEST EDIT BY MATT
-    @Override
-    public void addMockData() {
-        List<Issue> mockIssues = List.of(
-                createMockIssue("Broken Tap", 40.7128, -74.0060, "Toilet", "Plumbing"),
-                createMockIssue("Broken Chair", 34.0522, -118.2437, "VMES1003", "Maintenance"),
-                createMockIssue("Plug Not Working", 51.5074, -0.1278, "VMES0101", "ELectrical")
-        );
-
-        issueRepository.saveAll(mockIssues);
-    }
 
 
 
 
-    private Issue createMockIssue(String description, double latitude, double longitude, String location, String category) {
-        Issue issue = new Issue();
-        issue.setDescription(description);
-        issue.setLatitude(latitude);
-        issue.setLongitude(longitude);
-        issue.setCustomLocation(location);
-        issue.setCategory(category);
-        issue.setStatus("PENDING");
-        issue.setUsingCustomLocation(true);
-        issue.setPhotoUrls(List.of("http://example.com/photo1.jpg", "http://example.com/photo2.jpg"));
 
-        User mockUser = new User();
-        mockUser.setId(1L); // Replace with a valid user ID from your database
-        issue.setReportedBy(mockUser);
-
-        return issue;
-    }
 
 
     @Override
@@ -325,6 +299,16 @@ public class IssueServiceImpl implements IssueService {
     public IssueResponse getUnassignedIssueByID(Long issueId) {
         Issue issue = issueRepository.getUnassignedIssueByID(issueId);
         return convertToResponse(issue);
+    }
+
+    @Override
+    public List<IssueResponse> getCompletedIssues() {
+        List<Issue> completedIssues = issueRepository.findCompletedIssues("completed");
+
+        // Convert entities to DTOs if needed
+        return completedIssues.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
 

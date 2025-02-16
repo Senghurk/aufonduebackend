@@ -21,13 +21,13 @@ public interface IssueService {
 
 
     // TEST EDIT BY MATT
-    void addMockData(); // For adding mock data
     void assignIssueToStaff(Long issueId, Long staffId);
 
     List<IssueResponse> getUnassignedIssues(int page, int size);
 
     List<IssueResponse> getAssignedIssues(int page, int size);
     IssueResponse getUnassignedIssueByID(Long id);
+    List<IssueResponse>getCompletedIssues();
 
 
 

@@ -55,6 +55,7 @@ public class Issue {
     //Additions for admin
     @Column(nullable = false)
     private Boolean assigned = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_staff_id")
     private Staff assignedTo;

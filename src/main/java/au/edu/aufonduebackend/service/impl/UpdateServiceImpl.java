@@ -58,27 +58,7 @@ public class UpdateServiceImpl implements UpdateService {
         return new UpdateResponse(update.getId(), issue.getId(), update.getStatus(), update.getComment(), update.getUpdateTime(), update.getPhotoUrls());
     }
 
-    @Override
-    @Transactional
-    public UpdateResponse changeUpdateStatus(Long updateId, String newStatus) {
-        Update update = updateRepository.findById(updateId)
-                .orElseThrow(() -> new EntityNotFoundException("Update not found"));
 
-        // Validate new status
-        if (!VALID_STATUSES.contains(newStatus.toUpperCase())) {
-            throw new IllegalArgumentException("Invalid status: " + newStatus);
-        }
-
-        // Update the status in Update (which also updates Issue status)
-        update.setStatus(newStatus);
-
-        // Save both update and issue changes
-        issueRepository.save(update.getIssue());
-        update = updateRepository.save(update); // Save the update
-
-        // Return as UpdateResponse DTO
-        return new UpdateResponse(update.getId(), update.getIssue().getId(), update.getStatus(), update.getComment(), update.getUpdateTime(), update.getPhotoUrls());
-    }
 
     @Override
     public List<UpdateResponse> getUpdatesByIssueId(Long issueId) {

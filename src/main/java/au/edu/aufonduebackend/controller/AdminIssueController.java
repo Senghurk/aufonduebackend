@@ -27,11 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/issues")
 public class AdminIssueController {
     @Autowired
@@ -41,7 +42,9 @@ public class AdminIssueController {
     @Autowired
     public UpdateService updateService;
 
-    public UpdateRepository updateRepository;
+
+    @Autowired
+    public IssueRepository issueRepository;
 
     @GetMapping("/reports")
     public ResponseEntity<List<IssueResponse>> getAllReports(
@@ -56,12 +59,7 @@ public class AdminIssueController {
         return ResponseEntity.ok(issues);
     }
 
-    @PostMapping("/reports")
-    public ResponseEntity<String> addMockData() {
-        // Use the service to add mock data
-        issueService.addMockData();
-        return ResponseEntity.status(HttpStatus.CREATED).body("Mock data added successfully!");
-    }
+
 
     @DeleteMapping("/reports/{id}")
     public ResponseEntity<Void> deleteReport(@PathVariable Long id) {
@@ -129,18 +127,33 @@ public class AdminIssueController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("updates/{updateId}/status")
-    public ResponseEntity<UpdateResponse> changeUpdateStatus(
-            @PathVariable Long updateId,
-            @RequestParam String newStatus) {
 
-        UpdateResponse response = updateService.changeUpdateStatus(updateId, newStatus);
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/{issueId}/updates")
     public ResponseEntity<List<UpdateResponse>> getUpdatesByIssue(@PathVariable Long issueId) {
         List<UpdateResponse> updates = updateService.getUpdatesByIssueId(issueId);
         return ResponseEntity.ok(updates);
+    }
+
+
+    @GetMapping("/completed")
+    public ResponseEntity<List<IssueResponse>> getCompletedIssues() {
+        return ResponseEntity.ok(issueService.getCompletedIssues());
+    }
+
+
+    // to get issue stats
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Long>> getIssueStats() {
+        long totalIssues = issueRepository.count();
+        long pendingIssues = issueRepository.countByStatus("PENDING");
+        long completedIssues = issueRepository.countByStatus("COMPLETED");
+
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("totalIssues", totalIssues);
+        stats.put("pendingIssues", pendingIssues);
+        stats.put("completedIssues", completedIssues);
+
+        return ResponseEntity.ok(stats);
     }
 }

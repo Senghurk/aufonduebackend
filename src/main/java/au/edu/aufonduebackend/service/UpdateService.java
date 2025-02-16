@@ -10,6 +10,5 @@ import java.util.List;
 
 public interface UpdateService {
      UpdateResponse createUpdate(UpdateRequest request, List<MultipartFile> photos);
-     UpdateResponse changeUpdateStatus(Long updateId, String newStatus);
      List<UpdateResponse> getUpdatesByIssueId(Long issueId);
 }

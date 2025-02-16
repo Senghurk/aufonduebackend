@@ -11,7 +11,7 @@ import java.util.List;
 public class UpdateRequest {
 
     private Long issueId;
-    private String status;  // Keep status as String
+    private String status;
     private String comment;
     private LocalDateTime updateTime;
 

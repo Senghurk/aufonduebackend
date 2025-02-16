@@ -3,49 +3,71 @@
 package au.edu.aufonduebackend.service.impl;
 
 import au.edu.aufonduebackend.service.StorageService;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class StorageServiceImpl implements StorageService {
-    private final Path root = Paths.get("uploads");
 
-    public StorageServiceImpl() {
-        try {
-            Files.createDirectories(root);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not initialize storage location", e);
-        }
-    }
+    private final BlobContainerClient blobContainerClient;
 
     @Override
     public String uploadFile(MultipartFile file) {
         try {
-            // Validate file type
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                throw new RuntimeException("Invalid file type. Only images are allowed.");
-            }
+            System.out.println("Starting file upload to Azure Blob Storage");
+            System.out.println("Container Client exists: " + (blobContainerClient != null));
+            System.out.println("Container Name: " + blobContainerClient.getBlobContainerName());
 
-            String filename = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-            Files.copy(file.getInputStream(), this.root.resolve(filename));
-            return "/uploads/" + filename;
+            // Generate a unique filename
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null ?
+                    originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+            String filename = String.format("%s-%s%s", timestamp, UUID.randomUUID(), extension);
+
+            System.out.println("Generated filename: " + filename);
+
+            // Get a reference to a blob
+            BlobClient blobClient = blobContainerClient.getBlobClient(filename);
+            System.out.println("Created blob client for: " + blobClient.getBlobUrl());
+
+            // Upload the file
+            System.out.println("File size: " + file.getSize());
+            blobClient.upload(new ByteArrayInputStream(file.getBytes()), file.getSize(), true);
+
+            System.out.println("File uploaded successfully");
+            String blobUrl = blobClient.getBlobUrl();
+            System.out.println("Blob URL: " + blobUrl);
+
+            return blobUrl;
         } catch (Exception e) {
-            throw new RuntimeException("Could not store the file", e);
+            System.err.println("Error uploading to Azure Blob Storage: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to upload file to Azure Blob Storage", e);
         }
     }
 
     @Override
     public void deleteFile(String fileUrl) {
         try {
-            String filename = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
-            Files.deleteIfExists(this.root.resolve(filename));
+            // Extract the blob name from the URL
+            String blobName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
+            // Get a reference to the blob and delete it
+            BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
+            blobClient.deleteIfExists();
+
         } catch (Exception e) {
-            throw new RuntimeException("Could not delete the file", e);
+            throw new RuntimeException("Failed to delete file from Azure Blob Storage", e);
         }
     }
 }

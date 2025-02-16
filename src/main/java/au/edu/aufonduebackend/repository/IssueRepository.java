@@ -80,6 +80,10 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Query("SELECT i FROM Issue i WHERE i.id = :id AND i.assigned = false")
     Issue getUnassignedIssueByID(@Param("id") Long id);
 
+    @Query("SELECT i FROM Issue i WHERE LOWER(i.status) = LOWER(:status)")
+    List<Issue> findCompletedIssues(@Param("status") String status);
+
+    long countByStatus(String status);
 
 
 
