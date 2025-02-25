@@ -2,10 +2,13 @@ package au.edu.aufonduebackend.service.impl;
 
 import au.edu.aufonduebackend.model.dto.request.IssueRequest;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
+import au.edu.aufonduebackend.model.dto.response.StaffResponse;
 import au.edu.aufonduebackend.model.dto.response.UserResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
+import au.edu.aufonduebackend.model.entity.Staff;
 import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.repository.IssueRepository;
+import au.edu.aufonduebackend.repository.StaffRepository;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.StorageService;
 import au.edu.aufonduebackend.service.UserService;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
+    private final StaffRepository staffRepository;
     private final StorageService storageService;
     private final UserService userService;
 
@@ -207,6 +211,7 @@ public class IssueServiceImpl implements IssueService {
         response.setPhotoUrls(issue.getPhotoUrls() != null ? issue.getPhotoUrls() : new ArrayList<>());
         response.setCreatedAt(issue.getCreatedAt());
         response.setUpdatedAt(issue.getUpdatedAt());
+        response.setAssigned(issue.getAssigned());
 
         if (issue.getReportedBy() != null) {
             UserResponse userResponse = new UserResponse();
@@ -214,6 +219,14 @@ public class IssueServiceImpl implements IssueService {
             userResponse.setUsername(issue.getReportedBy().getUsername());
             userResponse.setEmail(issue.getReportedBy().getEmail());
             response.setReportedBy(userResponse);
+        }
+
+        if (issue.getAssignedTo() != null) {
+            StaffResponse staffResponse = new StaffResponse();
+            staffResponse.setId(issue.getAssignedTo().getId());
+            staffResponse.setName(issue.getAssignedTo().getName());
+            staffResponse.setEmail(issue.getAssignedTo().getEmail());
+            response.setAssignedTo(staffResponse);
         }
 
         return response;
@@ -253,4 +266,54 @@ public class IssueServiceImpl implements IssueService {
             throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
         }
     }
+
+    @Override
+    public void assignIssueToStaff(Long issueId, Long staffId) {
+        // Fetch the issue by ID
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + issueId));
+
+        // Fetch the staff by ID
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+
+        // Update the issue
+        issue.setAssigned(true);
+        issue.setAssignedTo(staff);
+        issueRepository.save(issue); // Save the updated issue
+    }
+
+    @Override
+    public List<IssueResponse> getUnassignedIssues(int page, int size) {
+        List<Issue> unassignedIssues = issueRepository.findByAssignedFalse();
+        return unassignedIssues.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IssueResponse> getAssignedIssues(int page, int size) {
+        List<Issue> assignedIssues = issueRepository.findByAssignedTrue();
+        return assignedIssues.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public IssueResponse getUnassignedIssueByID(Long issueId) {
+        Issue issue = issueRepository.getUnassignedIssueByID(issueId);
+        return convertToResponse(issue);
+    }
+
+    @Override
+    public List<IssueResponse> getCompletedIssues() {
+        List<Issue> completedIssues = issueRepository.findCompletedIssues("completed");
+
+        // Convert entities to DTOs if needed
+        return completedIssues.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+
 }
