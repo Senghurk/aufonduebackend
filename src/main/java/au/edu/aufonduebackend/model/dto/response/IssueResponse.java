@@ -21,4 +21,6 @@ public class IssueResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserResponse reportedBy;
+    private boolean assigned;
+    private StaffResponse assignedTo;
 }
