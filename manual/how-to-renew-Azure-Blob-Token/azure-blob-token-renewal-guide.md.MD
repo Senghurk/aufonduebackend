@@ -12,12 +12,6 @@ The AU Fondue backend uses Azure Blob Storage to store uploaded photos from main
 
 Based on the codebase analysis, the current SAS token configuration is:
 
-```
-Current Token: sp=racwl&st=2025-02-25T05:25:29Z&se=2025-05-01T13:25:29Z&sv=2022-11-02&sr=c&sig=tLy7KN14KKIju3BkWj3j9WxhTRlFYJZEh404Wfp9lTQ%3D
-Expiration Date: May 1, 2025, 13:25:29 UTC
-Storage Container: aufondue
-Blob Storage URL: https://aufondueblob.blob.core.windows.net/aufondue/
-```
 
 ## When to Renew
 
