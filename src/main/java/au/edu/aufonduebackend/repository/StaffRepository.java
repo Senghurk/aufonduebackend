@@ -1,14 +1,13 @@
 package au.edu.aufonduebackend.repository;
 
-
 import au.edu.aufonduebackend.model.entity.Staff;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
+//Manages staff member data - staff account management
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
     @Query(value = """

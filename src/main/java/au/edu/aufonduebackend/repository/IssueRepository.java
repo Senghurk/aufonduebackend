@@ -1,17 +1,16 @@
 package au.edu.aufonduebackend.repository;
 
-import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
 import au.edu.aufonduebackend.model.entity.Staff;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
+
+//Handles database operations for maintenance issues (CRUD)
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findByStatus(String status);
@@ -84,9 +83,5 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findCompletedIssues(@Param("status") String status);
 
     long countByStatus(String status);
-
-
-
-
 
 }

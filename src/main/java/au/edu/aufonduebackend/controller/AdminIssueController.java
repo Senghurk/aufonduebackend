@@ -2,35 +2,24 @@ package au.edu.aufonduebackend.controller;
 
 
 import au.edu.aufonduebackend.model.dto.request.UpdateRequest;
-import au.edu.aufonduebackend.model.dto.response.ApiResponse;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.model.dto.response.UpdateResponse;
-import au.edu.aufonduebackend.model.entity.Issue;
-import au.edu.aufonduebackend.model.entity.Staff;
-import au.edu.aufonduebackend.model.entity.Update;
-import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.repository.IssueRepository;
-import au.edu.aufonduebackend.repository.UpdateRepository;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.StaffService;
 import au.edu.aufonduebackend.service.UpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Admin-specific endpoints for issue management
 
 @Controller
 @RequestMapping("/api/issues")

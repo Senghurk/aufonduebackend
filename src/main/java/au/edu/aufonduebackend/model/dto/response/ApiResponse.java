@@ -1,4 +1,3 @@
-// File: src/main/java/au/edu/aufonduebackend/model/dto/response/ApiResponse.java
 
 package au.edu.aufonduebackend.model.dto.response;
 
@@ -6,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+ // consistent response structure success/error handling - generic wrapper
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

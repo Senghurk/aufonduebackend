@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// Endpoints for user account management
+
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin

@@ -1,4 +1,3 @@
-// File: IssueResponse.java
 package au.edu.aufonduebackend.model.dto.response;
 
 import lombok.Getter;
@@ -6,6 +5,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// issue data for client
 @Getter
 @Setter
 public class IssueResponse {

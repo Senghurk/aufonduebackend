@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
 
+// data for creating/updating an issue (description, location, photos)
 @Getter
 @Setter
 public class IssueRequest {

@@ -1,14 +1,13 @@
 package au.edu.aufonduebackend.controller;
 
 import au.edu.aufonduebackend.model.dto.response.StaffResponse;
-import au.edu.aufonduebackend.model.entity.Staff;
 import au.edu.aufonduebackend.service.StaffService;
-import au.edu.aufonduebackend.service.impl.StaffServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
 import java.util.List;
+
+
+// Endpoints for staff account management
 
 @RestController
 @RequestMapping("/api/staff")
