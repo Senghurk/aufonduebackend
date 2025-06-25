@@ -27,7 +27,7 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Optional: Add a constructor that takes required fields
+    // Optional-a constructor that takes required fields
     public User() {}
 
     public User(String username, String email) {

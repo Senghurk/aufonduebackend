@@ -14,6 +14,8 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 
 import java.util.Arrays;
 
+// Spring Security, CORS, and authentication
+
 @Configuration
 //@Profile("dev")
 public class SecurityConfig {
