@@ -204,6 +204,7 @@ public class IssueServiceImpl implements IssueService {
         response.setCreatedAt(issue.getCreatedAt());
         response.setUpdatedAt(issue.getUpdatedAt());
         response.setAssigned(issue.getAssigned());
+        response.setPriority(issue.getPriority());
 
         if (issue.getReportedBy() != null) {
             UserResponse userResponse = new UserResponse();
@@ -264,7 +265,7 @@ public class IssueServiceImpl implements IssueService {
 
 
     @Override
-    public void assignIssueToStaff(Long issueId, Long staffId) {
+    public void assignIssueToStaff(Long issueId, Long staffId, String priority) {
         // Fetch the issue by ID
         Issue issue = issueRepository.findById(issueId)
                 .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + issueId));
@@ -276,6 +277,10 @@ public class IssueServiceImpl implements IssueService {
         // Update the issue
         issue.setAssigned(true);
         issue.setAssignedTo(staff);
+        if (priority != null) {
+            priority = priority.toUpperCase();
+            issue.setPriority(priority);
+        }
         issueRepository.save(issue); // Save the updated issue
     }
 
@@ -310,6 +315,8 @@ public class IssueServiceImpl implements IssueService {
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
+
+
 
 
 }

@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+<<<<<<< Updated upstream
+=======
+import java.time.Instant;
+>>>>>>> Stashed changes
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +19,7 @@ public class UpdateResponse {
     private Long issueId;
     private String status;
     private String comment;
-    private LocalDateTime updateTime;
+    private Instant updateTime;
     private List<String> photoUrls;
 
 }

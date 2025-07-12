@@ -101,9 +101,10 @@ public class AdminIssueController {
     @PostMapping("/{issueId}/assign")
     public ResponseEntity<String> assignIssueToStaff(
             @PathVariable Long issueId,
-            @RequestParam Long staffId
+            @RequestParam Long staffId,
+            @RequestParam(required = false) String priority
     ) {
-        issueService.assignIssueToStaff(issueId, staffId);
+        issueService.assignIssueToStaff(issueId, staffId, priority);
         return ResponseEntity.ok("Issue assigned successfully.");
     }
 

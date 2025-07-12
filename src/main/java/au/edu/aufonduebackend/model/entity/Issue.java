@@ -7,6 +7,10 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+<<<<<<< Updated upstream
+=======
+import java.time.Instant;
+>>>>>>> Stashed changes
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +46,10 @@ public class Issue {
     private List<String> photoUrls = new ArrayList<>();
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by_user_id")
@@ -60,5 +64,7 @@ public class Issue {
     @JoinColumn(name = "assigned_staff_id")
     private Staff assignedTo;
 
+    @Column(nullable = true)
+    private String priority;
 
 }

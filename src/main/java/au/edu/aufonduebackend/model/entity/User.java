@@ -5,8 +5,13 @@ package au.edu.aufonduebackend.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+<<<<<<< Updated upstream
 import org.hibernate.annotations.UpdateTimestamp;
 
+=======
+
+import java.time.Instant;
+>>>>>>> Stashed changes
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,7 +30,12 @@ public class User {
     private String email;
 
     @CreationTimestamp
+<<<<<<< Updated upstream
     private LocalDateTime createdAt;
+=======
+    @Column(name = "created_at")
+    private Instant createdAt;
+>>>>>>> Stashed changes
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

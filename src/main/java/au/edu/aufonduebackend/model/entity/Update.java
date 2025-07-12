@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class Update {
     private List<String> photoUrls = new ArrayList<>();
 
     @CreationTimestamp
-    private LocalDateTime updateTime;
+    private Instant updateTime;
 
     // Method to update the issue status when update status changes
     public void setStatus(String status) {
