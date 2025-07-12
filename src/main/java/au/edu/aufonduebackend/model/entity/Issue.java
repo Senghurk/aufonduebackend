@@ -7,11 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-<<<<<<< Updated upstream
-=======
+
 import java.time.Instant;
->>>>>>> Stashed changes
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

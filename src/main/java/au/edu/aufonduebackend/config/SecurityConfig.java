@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @Profile("dev")
@@ -26,6 +27,7 @@ public class SecurityConfig {
 
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:3000"));
                     config.setAllowedOrigins(Arrays.asList("*"));
                     config.setAllowedMethods(Arrays.asList("*"));
                     config.setAllowedHeaders(Arrays.asList("*"));
@@ -38,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/issues/updates").permitAll()
                         .requestMatchers("/api/issues/stats").permitAll()
                         .requestMatchers("/api/staff/**").permitAll()
+                        .requestMatchers("/api/admin").permitAll()
+                        .requestMatchers("/api/admin/check").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/test").permitAll()
 

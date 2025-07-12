@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-<<<<<<< Updated upstream
-=======
+
 import java.time.Instant;
->>>>>>> Stashed changes
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 @Getter
