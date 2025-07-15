@@ -16,9 +16,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUserAfterAuthentication(String username, String email) {
-        if (!email.toLowerCase().endsWith("@au.edu")) {
-            throw new IllegalArgumentException("Only AU email addresses are allowed");
-        }
 
         return userRepository.findByEmail(email)
                 .orElseGet(() -> {
