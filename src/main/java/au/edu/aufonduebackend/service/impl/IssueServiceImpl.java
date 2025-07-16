@@ -235,32 +235,31 @@ public class IssueServiceImpl implements IssueService {
     private void validateIssueRequest(IssueRequest request) {
         List<String> errors = new ArrayList<>();
 
+        // Description is required
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add("Description is required");
         }
 
+        // User email is required (but no domain restriction)
         if (request.getUserEmail() == null || request.getUserEmail().trim().isEmpty()) {
             errors.add("User email is required");
-        } else if (!request.getUserEmail().toLowerCase().endsWith("@au.edu")) {
-            errors.add("Only AU email addresses are allowed");
         }
 
-        if (request.isUsingCustomLocation()) {
-            if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
-                errors.add("Custom location is required when using custom location");
-            }
-        } else {
-            if (request.getLatitude() == null || request.getLongitude() == null) {
-                errors.add("Latitude and longitude are required when not using custom location");
-            }
+        // Custom location is required (since app always uses custom location)
+        if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
+            errors.add("Location description is required");
         }
 
+        // Category is required
         if (request.getCategory() == null || request.getCategory().trim().isEmpty()) {
             errors.add("Category is required");
         } else if ("Custom".equals(request.getCategory()) &&
                 (request.getCustomCategory() == null || request.getCustomCategory().trim().isEmpty())) {
             errors.add("Custom category description is required when using custom category");
         }
+
+        // Note: Photo validation is handled separately in the controller/service layer
+        // since photos are uploaded as multipart files
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
