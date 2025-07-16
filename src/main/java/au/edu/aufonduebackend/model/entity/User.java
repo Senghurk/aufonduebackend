@@ -22,12 +22,15 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    // ADD THIS NEW FIELD FOR FCM
+    @Column(name = "fcm_token")
+    private String fcmToken;
 
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Optional-a constructor that takes required fields
+    // Optional constructor that takes required fields
     public User() {}
 
     public User(String username, String email) {
