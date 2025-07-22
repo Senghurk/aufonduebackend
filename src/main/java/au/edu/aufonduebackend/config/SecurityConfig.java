@@ -2,30 +2,25 @@ package au.edu.aufonduebackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 import java.util.Arrays;
 
-// Spring Security, CORS, and authentication
+// Spring Security with NO authentication - everything bypassed
 
 @Configuration
-//@Profile("dev")
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable());
         http
                 .csrf(AbstractHttpConfigurer::disable)
-
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(Arrays.asList("*"));
@@ -34,18 +29,7 @@ public class SecurityConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/issues").permitAll()
-                        .requestMatchers("/api/issues/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/issues/updates").permitAll()
-                        .requestMatchers("/api/issues/updates").permitAll()
-                        .requestMatchers("/api/issues/stats").permitAll()
-                        .requestMatchers("/api/staff/**").permitAll()
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/test").permitAll()
-                        .requestMatchers("/api/users/create").permitAll()
-                        .requestMatchers("/api/users/**").permitAll()
-                        .anyRequest().permitAll()
-
+                        .anyRequest().permitAll()  // BYPASS ALL SECURITY
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -5,11 +5,13 @@ import au.edu.aufonduebackend.model.dto.response.UserResponse;
 import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.service.UserService;
 import au.edu.aufonduebackend.service.FcmService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// Endpoints for user account management
+// Endpoints for user account management with Microsoft authentication
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,8 +25,34 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @RequestParam String username,
-            @RequestParam String email) {
+            @RequestParam String email,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // If Authorization header is present, verify it's Microsoft + @au.edu
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String idToken = authHeader.substring(7);
+
+                try {
+                    FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+                    String tokenEmail = decodedToken.getEmail();
+
+                    // Validate AU domain
+                    if (tokenEmail == null || !tokenEmail.endsWith("@au.edu")) {
+                        return ResponseEntity.badRequest()
+                                .body(ApiResponse.error("Access restricted to AU university accounts only"));
+                    }
+
+                    // Use email from token instead of parameter
+                    email = tokenEmail;
+                    username = decodedToken.getName() != null ?
+                            decodedToken.getName() : email.substring(0, email.indexOf("@"));
+
+                } catch (Exception e) {
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("Invalid authentication token"));
+                }
+            }
+
             User user = userService.createUserAfterAuthentication(username, email);
             UserResponse response = new UserResponse();
             response.setId(user.getId());
@@ -39,13 +67,29 @@ public class UserController {
         }
     }
 
-    // ADD THESE NEW FCM ENDPOINTS
     @PostMapping("/update-fcm-token")
     public ResponseEntity<ApiResponse<String>> updateFcmToken(
             @RequestParam String email,
-            @RequestParam String fcmToken) {
+            @RequestParam String fcmToken,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         try {
+            // If Authorization header is present, get email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String idToken = authHeader.substring(7);
+
+                try {
+                    FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+                    String tokenEmail = decodedToken.getEmail();
+
+                    if (tokenEmail != null && tokenEmail.endsWith("@au.edu")) {
+                        email = tokenEmail; // Use email from token
+                    }
+                } catch (Exception e) {
+                    // If token verification fails, fall back to parameter
+                }
+            }
+
             userService.updateFcmToken(email, fcmToken);
             return ResponseEntity.ok(new ApiResponse<>(true, "FCM token updated successfully", null));
         } catch (Exception e) {
@@ -55,8 +99,26 @@ public class UserController {
     }
 
     @DeleteMapping("/remove-fcm-token")
-    public ResponseEntity<ApiResponse<String>> removeFcmToken(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<String>> removeFcmToken(
+            @RequestParam String email,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // If Authorization header is present, get email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String idToken = authHeader.substring(7);
+
+                try {
+                    FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+                    String tokenEmail = decodedToken.getEmail();
+
+                    if (tokenEmail != null && tokenEmail.endsWith("@au.edu")) {
+                        email = tokenEmail; // Use email from token
+                    }
+                } catch (Exception e) {
+                    // If token verification fails, fall back to parameter
+                }
+            }
+
             userService.removeFcmToken(email);
             return ResponseEntity.ok(new ApiResponse<>(true, "FCM token removed successfully", null));
         } catch (Exception e) {
