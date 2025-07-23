@@ -26,7 +26,7 @@ public class UpdateResponse {
 
     // Constructor without notification fields for backward compatibility
     public UpdateResponse(Long id, Long issueId, String status, String comment,
-                          LocalDateTime updateTime, List<String> photoUrls) {
+                          Instant updateTime, List<String> photoUrls) {
         this.id = id;
         this.issueId = issueId;
         this.status = status;
