@@ -12,7 +12,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
-
 import java.util.List;
 
 // Spring Security with NO authentication - everything bypassed
@@ -27,7 +26,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 🔓 Allow everything
+                        .anyRequest().permitAll() // Allow everything
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(Arrays.asList("*"));
+                    config.setAllowedMethods(Arrays.asList("*"));
+                    config.setAllowedHeaders(Arrays.asList("*"));
+                    return config;
+                }))
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()  // BYPASS ALL SECURITY
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
         return http.build();
@@ -43,7 +54,7 @@ public class SecurityConfig {
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
-        config.setAllowCredentials(true); // 👈 Important for frontend cookies/sessions
+        config.setAllowCredentials(true); // Important for frontend cookies/sessions
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

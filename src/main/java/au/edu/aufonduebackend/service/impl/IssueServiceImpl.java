@@ -11,6 +11,7 @@ import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.repository.StaffRepository;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.StorageService;
+import au.edu.aufonduebackend.service.UserService;
 import au.edu.aufonduebackend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -30,14 +31,21 @@ public class IssueServiceImpl implements IssueService {
     private final IssueRepository issueRepository;
     private final StaffRepository staffRepository;
     private final StorageService storageService;
+    private final UserService userService;
 
     @Override
     @Transactional
     public IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos) {
         validateIssueRequest(request);
 
+        // Get or create user from email
+        String email = request.getUserEmail();
+        String username = email.substring(0, email.indexOf("@")); // Extract username from email
+        User user = userService.createUserAfterAuthentication(username, email);
+
         Issue issue = new Issue();
         issue.setDescription(request.getDescription());
+        issue.setReportedBy(user);
 
         if (request.isUsingCustomLocation()) {
             issue.setCustomLocation(request.getCustomLocation());
@@ -228,20 +236,22 @@ public class IssueServiceImpl implements IssueService {
     private void validateIssueRequest(IssueRequest request) {
         List<String> errors = new ArrayList<>();
 
+        // Description is required
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add("Description is required");
         }
 
-        if (request.isUsingCustomLocation()) {
-            if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
-                errors.add("Custom location is required when using custom location");
-            }
-        } else {
-            if (request.getLatitude() == null || request.getLongitude() == null) {
-                errors.add("Latitude and longitude are required when not using custom location");
-            }
+        // User email is required (but no domain restriction)
+        if (request.getUserEmail() == null || request.getUserEmail().trim().isEmpty()) {
+            errors.add("User email is required");
         }
 
+        // Custom location is required (since app always uses custom location)
+        if (request.getCustomLocation() == null || request.getCustomLocation().trim().isEmpty()) {
+            errors.add("Location description is required");
+        }
+
+        // Category is required
         if (request.getCategory() == null || request.getCategory().trim().isEmpty()) {
             errors.add("Category is required");
         } else if ("Custom".equals(request.getCategory()) &&
@@ -249,20 +259,13 @@ public class IssueServiceImpl implements IssueService {
             errors.add("Custom category description is required when using custom category");
         }
 
+        // Note: Photo validation is handled separately in the controller/service layer
+        // since photos are uploaded as multipart files
+
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
         }
     }
-
-
-
-    //TEST EDIT BY MATT
-
-
-
-
-
-
 
     @Override
     public void assignIssueToStaff(Long issueId, Long staffId, String priority) {

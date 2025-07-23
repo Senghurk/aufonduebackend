@@ -1,6 +1,3 @@
-// File: src/main/java/au/edu/aufonduebackend/model/dto/request/IssueRequest.java
-
-
 package au.edu.aufonduebackend.model.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
 
+// data for creating/updating an issue (description, location, photos)
 @Getter
 @Setter
 public class IssueRequest {
@@ -22,7 +20,9 @@ public class IssueRequest {
     private String customCategory;
     private List<String> photoUrls;
 
-    // Use Lombok's @JsonProperty to handle the JSON field name mismatch
     @JsonProperty("isUsingCustomLocation")
     private boolean usingCustomLocation;
+
+    @NotBlank(message = "User email is required")
+    private String userEmail;
 }

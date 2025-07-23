@@ -5,36 +5,39 @@ import au.edu.aufonduebackend.model.dto.response.ApiResponse;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.service.IssueService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
+
+
+// API endpoints for users to create and view issues
 
 @RestController
 @RequestMapping("/api/issues")
 @CrossOrigin
+@RequiredArgsConstructor
 public class IssueController {
 
-    @Autowired
-    private IssueService issueService;
+    private final IssueService issueService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse<IssueResponse>> createIssue(
             @RequestPart("issue") String issueJson,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            IssueRequest request = mapper.readValue(issueJson, IssueRequest.class);
+            IssueRequest request = objectMapper.readValue(issueJson, IssueRequest.class);
             IssueResponse response = issueService.createIssue(request, photos);
             return ResponseEntity.ok(ApiResponse.success(response, "Issue created successfully"));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Error creating issue: " + e.getMessage()));
         }
     }
 
-    // New endpoint for user submitted issues
     @GetMapping("/user/{userId}/submitted")
     public ResponseEntity<ApiResponse<List<IssueResponse>>> getUserSubmittedIssues(
             @PathVariable Long userId,
@@ -45,7 +48,6 @@ public class IssueController {
         return ResponseEntity.ok(ApiResponse.success(issues, "User submitted issues retrieved successfully"));
     }
 
-    // New endpoint for tracking all issues
     @GetMapping("/tracking")
     public ResponseEntity<ApiResponse<List<IssueResponse>>> getAllIssuesTracking(
             @RequestParam(defaultValue = "0") int page,
@@ -66,22 +68,34 @@ public class IssueController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<IssueResponse>> getIssueById(@PathVariable Long id) {
-        IssueResponse issue = issueService.getIssueById(id);
-        return ResponseEntity.ok(ApiResponse.success(issue, "Issue retrieved successfully"));
+        try {
+            IssueResponse issue = issueService.getIssueById(id);
+            return ResponseEntity.ok(ApiResponse.success(issue, "Issue retrieved successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<IssueResponse>> updateIssue(
             @PathVariable Long id,
             @RequestBody IssueRequest request) {
-        IssueResponse updated = issueService.updateIssue(id, request);
-        return ResponseEntity.ok(ApiResponse.success(updated, "Issue updated successfully"));
+        try {
+            IssueResponse updated = issueService.updateIssue(id, request);
+            return ResponseEntity.ok(ApiResponse.success(updated, "Issue updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteIssue(@PathVariable Long id) {
-        issueService.deleteIssue(id);
-        return ResponseEntity.ok(ApiResponse.<Void>success(null, "Issue deleted successfully"));
+        try {
+            issueService.deleteIssue(id);
+            return ResponseEntity.ok(ApiResponse.<Void>success(null, "Issue deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     @GetMapping("/nearby")
@@ -89,7 +103,11 @@ public class IssueController {
             @RequestParam Double latitude,
             @RequestParam Double longitude,
             @RequestParam Double radiusKm) {
-        List<IssueResponse> issues = issueService.getNearbyIssues(latitude, longitude, radiusKm);
-        return ResponseEntity.ok(ApiResponse.success(issues, "Nearby issues retrieved successfully"));
+        try {
+            List<IssueResponse> issues = issueService.getNearbyIssues(latitude, longitude, radiusKm);
+            return ResponseEntity.ok(ApiResponse.success(issues, "Nearby issues retrieved successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 }

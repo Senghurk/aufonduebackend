@@ -24,7 +24,7 @@ public class Update {
     private Issue issue;
 
     @Column(nullable = false)
-    private String status;  // This status should update the Issue's status
+    private String status;  //  update the Issue's status
 
     @Column(nullable = true)
     private String comment;

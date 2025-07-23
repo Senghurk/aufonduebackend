@@ -1,5 +1,3 @@
-// File: src/main/java/au/edu/aufonduebackend/service/impl/StorageServiceImpl.java
-
 package au.edu.aufonduebackend.service.impl;
 
 import au.edu.aufonduebackend.service.StorageService;

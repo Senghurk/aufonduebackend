@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// data for creating updates to issues (status, comments)
 @Getter
 @Setter
 public class UpdateRequest {
