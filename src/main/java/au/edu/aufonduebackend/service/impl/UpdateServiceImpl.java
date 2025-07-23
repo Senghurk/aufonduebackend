@@ -32,7 +32,7 @@ public class UpdateServiceImpl implements UpdateService {
     private final FcmService fcmService; // ADD THIS
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateServiceImpl.class);
-    private static final List<String> VALID_STATUSES = Arrays.asList("PENDING", "IN_PROGRESS", "COMPLETED");
+    private static final List<String> VALID_STATUSES = Arrays.asList("PENDING", "IN PROGRESS", "COMPLETED");
 
     @Override
     @Transactional
