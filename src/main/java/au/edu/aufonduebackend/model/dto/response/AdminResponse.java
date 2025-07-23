@@ -12,6 +12,4 @@ public class AdminResponse {
     private Long id;
     private String email;
     private String username;
-    private Boolean invited;
-    private Boolean registered;
 }

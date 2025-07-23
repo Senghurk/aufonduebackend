@@ -52,7 +52,7 @@ public class AdminAccController {
         return ResponseEntity.ok(admins);
     }
 
-    // Optional: remove this if no longer needed
+
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkAdminEmail(@RequestParam String email) {
         Optional<Admin> adminOptional = adminService.findByEmail(email);
@@ -61,7 +61,5 @@ public class AdminAccController {
     }
 
 
-    // ❌ DEPRECATED: Not needed if you don't use invited/registered
-    // @PutMapping("/register")
-    // public ResponseEntity<Void> markAsRegistered(...) { ... }
+
 }

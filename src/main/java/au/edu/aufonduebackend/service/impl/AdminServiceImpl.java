@@ -25,8 +25,6 @@ public class AdminServiceImpl implements AdminService {
         response.setId(admin.getId());
         response.setUsername(admin.getUsername());
         response.setEmail(admin.getEmail());
-        response.setInvited(admin.getInvited());
-        response.setRegistered(admin.getRegistered());
         return response;
     }
     @Override
@@ -45,26 +43,7 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public String getAdminStatusByEmail(String email) {
-        Optional<Admin> adminOptional = adminRepository.findByEmail(email);
 
-        if (adminOptional.isEmpty()) {
-            return "not_invited";
-        }
-
-        Admin admin = adminOptional.get();
-
-        if (Boolean.TRUE.equals(admin.getInvited()) && !Boolean.TRUE.equals(admin.getRegistered())) {
-            return "can_signup";
-        }
-
-        if (Boolean.TRUE.equals(admin.getInvited()) && Boolean.TRUE.equals(admin.getRegistered())) {
-            return "can_login";
-        }
-
-        return "not_invited"; // fallback
-        }
 
 
     @Override

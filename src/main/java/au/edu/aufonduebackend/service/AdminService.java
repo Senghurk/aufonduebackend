@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface AdminService {
     List<AdminResponse> getAllAdmins();
     AdminResponse addAdmin(Admin admin);
-    String getAdminStatusByEmail(String email) ;
+
 
     Optional<Admin> findByEmail(String email);
 }
