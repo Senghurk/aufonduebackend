@@ -1,5 +1,3 @@
-// File: src/main/java/au/edu/aufonduebackend/model/entity/User.java
-
 package au.edu.aufonduebackend.model.entity;
 
 import jakarta.persistence.*;
@@ -7,10 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-
-
 import java.time.Instant;
-
 
 @Entity
 @Table(name = "users")
@@ -23,15 +18,28 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
+    @Column(nullable = false)
+    private String role;
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(name = "fcm_token")
+    private String fcmToken;
 
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;
 
-
     @UpdateTimestamp
     private Instant updatedAt;
+
+    // Optional constructor that takes required fields
+    public User() {}
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
+        this.role = "USER";  // Default role
+    }
 }

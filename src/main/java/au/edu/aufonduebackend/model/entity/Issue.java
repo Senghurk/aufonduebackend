@@ -1,4 +1,3 @@
-// File: Issue.java
 package au.edu.aufonduebackend.model.entity;
 
 import jakarta.persistence.*;
@@ -7,10 +6,11 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+//Represents maintenance issues with location, description, photos, and status
 
 @Entity
 @Table(name = "issues")
@@ -52,8 +52,7 @@ public class Issue {
     @JoinColumn(name = "reported_by_user_id")
     private User reportedBy;
 
-
-    //Additions for admin
+    // Additions for admin
     @Column(nullable = false)
     private Boolean assigned = false;
 
@@ -63,5 +62,4 @@ public class Issue {
 
     @Column(nullable = true)
     private String priority;
-
 }
