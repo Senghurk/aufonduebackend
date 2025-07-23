@@ -13,6 +13,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import java.util.List;
+import java.util.Arrays;
 
 // Spring Security with NO authentication - everything bypassed
 
@@ -27,18 +28,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Allow everything
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Arrays.asList("*"));
-                    config.setAllowedMethods(Arrays.asList("*"));
-                    config.setAllowedHeaders(Arrays.asList("*"));
-                    return config;
-                }))
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // BYPASS ALL SECURITY
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
         return http.build();

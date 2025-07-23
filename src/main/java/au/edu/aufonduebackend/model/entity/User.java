@@ -1,10 +1,10 @@
 package au.edu.aufonduebackend.model.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -22,9 +22,8 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
-  
-    //  NEW FIELD FOR FCM
 
+    // NEW FIELD FOR FCM
     @Column(name = "fcm_token")
     private String fcmToken;
 
@@ -33,8 +32,8 @@ public class User {
     private Instant createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private Instant updatedAt;
-    private LocalDateTime createdAt;
 
     // Optional constructor that takes required fields
     public User() {}
@@ -44,3 +43,4 @@ public class User {
         this.email = email;
         this.role = "USER";  // Default role
     }
+}
