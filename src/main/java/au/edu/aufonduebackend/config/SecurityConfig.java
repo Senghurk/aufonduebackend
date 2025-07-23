@@ -39,7 +39,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "https://au-fondue-web.vercel.app",
                 "http://localhost:3000",
-                "https://aufonduebackend.kindisland-399ef298.southeastasia.azurecontainerapps.io"
+                "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
