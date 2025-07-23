@@ -148,13 +148,17 @@ public class AdminIssueController {
     public ResponseEntity<Map<String, Long>> getIssueStats() {
         long totalIssues = issueRepository.count();
         long pendingIssues = issueRepository.countByStatus("PENDING");
+        long inProgressIssues = issueRepository.countByStatus("IN PROGRESS");
         long completedIssues = issueRepository.countByStatus("COMPLETED");
+
+        long incompleteIssues = pendingIssues + inProgressIssues;
 
         Map<String, Long> stats = new HashMap<>();
         stats.put("totalIssues", totalIssues);
-        stats.put("pendingIssues", pendingIssues);
+        stats.put("incompleteIssues", incompleteIssues);
         stats.put("completedIssues", completedIssues);
 
         return ResponseEntity.ok(stats);
     }
+
 }

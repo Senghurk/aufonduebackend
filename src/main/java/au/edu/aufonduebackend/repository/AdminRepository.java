@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 
 
 //Handles database operations for maintenance issues (CRUD)
 @Repository
 public interface AdminRepository extends JpaRepository<Admin, Long> {
-    boolean existsByEmail(String email);
+    Optional<Admin> findByEmail(String email);
 }

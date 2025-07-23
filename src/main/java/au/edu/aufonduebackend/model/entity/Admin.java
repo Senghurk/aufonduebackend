@@ -24,4 +24,9 @@ public class Admin {
 
     @Column(nullable = false)
     private String username;
+
+    private Boolean invited = false;
+
+    private Boolean registered = false;
+
 }

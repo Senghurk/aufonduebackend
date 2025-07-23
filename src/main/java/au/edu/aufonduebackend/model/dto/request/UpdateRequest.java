@@ -15,6 +15,7 @@ public class UpdateRequest {
     private String status;
     private String comment;
     private Instant updateTime;
+    private String updatedBy;
 
 
 }
