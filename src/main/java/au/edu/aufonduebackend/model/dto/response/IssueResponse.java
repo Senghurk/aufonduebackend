@@ -2,7 +2,9 @@ package au.edu.aufonduebackend.model.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
+
 import java.util.List;
 
 // issue data for client
@@ -18,9 +20,10 @@ public class IssueResponse {
     private String category;
     private String status;
     private List<String> photoUrls;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     private UserResponse reportedBy;
     private boolean assigned;
     private StaffResponse assignedTo;
+    private String priority;
 }

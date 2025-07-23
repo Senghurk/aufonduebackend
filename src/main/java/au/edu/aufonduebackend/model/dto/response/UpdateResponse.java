@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+
+import java.time.Instant;
+
 import java.util.List;
 
 @Data
@@ -15,7 +17,7 @@ public class UpdateResponse {
     private Long issueId;
     private String status;
     private String comment;
-    private LocalDateTime updateTime;
+    private Instant updateTime;
     private List<String> photoUrls;
 
     // ADD THESE NEW FIELDS FOR NOTIFICATION STATUS

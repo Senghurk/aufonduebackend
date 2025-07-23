@@ -1,10 +1,10 @@
 package au.edu.aufonduebackend.model.entity;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,17 +42,16 @@ public class Issue {
     private List<String> photoUrls = new ArrayList<>();
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by_user_id")
     private User reportedBy;
 
-
-    //Additions for admin
+    // Additions for admin
     @Column(nullable = false)
     private Boolean assigned = false;
 
@@ -60,5 +59,6 @@ public class Issue {
     @JoinColumn(name = "assigned_staff_id")
     private Staff assignedTo;
 
-
+    @Column(nullable = true)
+    private String priority;
 }

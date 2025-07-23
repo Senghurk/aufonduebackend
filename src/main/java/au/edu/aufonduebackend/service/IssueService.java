@@ -21,7 +21,7 @@ public interface IssueService {
 
 
     // TEST EDIT BY MATT
-    void assignIssueToStaff(Long issueId, Long staffId);
+    void assignIssueToStaff(Long issueId, Long staffId, String priority);
 
     List<IssueResponse> getUnassignedIssues(int page, int size);
 
