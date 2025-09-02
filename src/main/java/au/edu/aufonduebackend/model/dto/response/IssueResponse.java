@@ -20,6 +20,7 @@ public class IssueResponse {
     private String category;
     private String status;
     private List<String> photoUrls;
+    private List<String> videoUrls;
     private Instant createdAt;
     private Instant updatedAt;
     private UserResponse reportedBy;

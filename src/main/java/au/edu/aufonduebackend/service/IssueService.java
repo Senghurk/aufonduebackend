@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface IssueService {
     // Create and modify operations
-    IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos);
+    IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos, List<MultipartFile> videos);
     IssueResponse updateIssue(Long id, IssueRequest request);
     void deleteIssue(Long id);
 

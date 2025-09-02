@@ -35,8 +35,8 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
-    public IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos) {
-        validateIssueRequest(request);
+    public IssueResponse createIssue(IssueRequest request, List<MultipartFile> photos, List<MultipartFile> videos) {
+        validateIssueRequest(request, photos, videos);
 
         // Get or create user from email
         String email = request.getUserEmail();
@@ -66,7 +66,9 @@ public class IssueServiceImpl implements IssueService {
 
         issue.setStatus("PENDING");
         issue.setPhotoUrls(new ArrayList<>());
+        issue.setVideoUrls(new ArrayList<>());
 
+        // Upload photos
         if (photos != null && !photos.isEmpty()) {
             try {
                 List<String> photoUrls = photos.stream()
@@ -75,6 +77,18 @@ public class IssueServiceImpl implements IssueService {
                 issue.setPhotoUrls(photoUrls);
             } catch (Exception e) {
                 throw new RuntimeException("Error uploading photos: " + e.getMessage());
+            }
+        }
+
+        // Upload videos
+        if (videos != null && !videos.isEmpty()) {
+            try {
+                List<String> videoUrls = videos.stream()
+                        .map(storageService::uploadFile)
+                        .collect(Collectors.toList());
+                issue.setVideoUrls(videoUrls);
+            } catch (Exception e) {
+                throw new RuntimeException("Error uploading videos: " + e.getMessage());
             }
         }
 
@@ -178,6 +192,16 @@ public class IssueServiceImpl implements IssueService {
             }
         }
 
+        if (issue.getVideoUrls() != null && !issue.getVideoUrls().isEmpty()) {
+            for (String videoUrl : issue.getVideoUrls()) {
+                try {
+                    storageService.deleteFile(videoUrl);
+                } catch (Exception e) {
+                    System.err.println("Error deleting video: " + videoUrl);
+                }
+            }
+        }
+
         issueRepository.deleteById(id);
     }
 
@@ -209,6 +233,7 @@ public class IssueServiceImpl implements IssueService {
         response.setCategory(issue.getCategory());
         response.setStatus(issue.getStatus());
         response.setPhotoUrls(issue.getPhotoUrls() != null ? issue.getPhotoUrls() : new ArrayList<>());
+        response.setVideoUrls(issue.getVideoUrls() != null ? issue.getVideoUrls() : new ArrayList<>());
         response.setCreatedAt(issue.getCreatedAt());
         response.setUpdatedAt(issue.getUpdatedAt());
         response.setAssigned(issue.getAssigned());
@@ -264,6 +289,53 @@ public class IssueServiceImpl implements IssueService {
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException("Invalid issue request: " + String.join(", ", errors));
+        }
+    }
+
+    private void validateIssueRequest(IssueRequest request, List<MultipartFile> photos, List<MultipartFile> videos) {
+        // Validate basic request fields
+        validateIssueRequest(request);
+
+        // Additional validation for media files
+        List<String> errors = new ArrayList<>();
+
+        // Check if at least one media file is provided
+        boolean hasPhotos = photos != null && !photos.isEmpty();
+        boolean hasVideos = videos != null && !videos.isEmpty();
+        
+        if (!hasPhotos && !hasVideos) {
+            errors.add("At least one photo or video must be provided");
+        }
+
+        // Validate video file size (100MB limit)
+        if (videos != null && !videos.isEmpty()) {
+            long maxVideoSize = 100 * 1024 * 1024L; // 100MB in bytes
+            
+            for (MultipartFile video : videos) {
+                if (video.getSize() > maxVideoSize) {
+                    errors.add("Video file '" + video.getOriginalFilename() + "' exceeds 100MB limit");
+                }
+                
+                // Check file type
+                String contentType = video.getContentType();
+                if (contentType != null && !contentType.startsWith("video/")) {
+                    errors.add("File '" + video.getOriginalFilename() + "' is not a valid video file");
+                }
+            }
+        }
+
+        // Validate photo files
+        if (photos != null && !photos.isEmpty()) {
+            for (MultipartFile photo : photos) {
+                String contentType = photo.getContentType();
+                if (contentType != null && !contentType.startsWith("image/")) {
+                    errors.add("File '" + photo.getOriginalFilename() + "' is not a valid image file");
+                }
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException("Invalid media files: " + String.join(", ", errors));
         }
     }
 

@@ -41,6 +41,11 @@ public class Issue {
     @Column(name = "photo_url")
     private List<String> photoUrls = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "issue_videos", joinColumns = @JoinColumn(name = "issue_id"))
+    @Column(name = "video_url")
+    private List<String> videoUrls = new ArrayList<>();
+
     @CreationTimestamp
     private Instant createdAt;
 

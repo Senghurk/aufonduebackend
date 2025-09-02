@@ -26,10 +26,11 @@ public class IssueController {
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse<IssueResponse>> createIssue(
             @RequestPart("issue") String issueJson,
-            @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
+            @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
+            @RequestPart(value = "videos", required = false) List<MultipartFile> videos) {
         try {
             IssueRequest request = objectMapper.readValue(issueJson, IssueRequest.class);
-            IssueResponse response = issueService.createIssue(request, photos);
+            IssueResponse response = issueService.createIssue(request, photos, videos);
             return ResponseEntity.ok(ApiResponse.success(response, "Issue created successfully"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
