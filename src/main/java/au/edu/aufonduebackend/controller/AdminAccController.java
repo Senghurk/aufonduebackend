@@ -3,6 +3,7 @@ package au.edu.aufonduebackend.controller;
 import au.edu.aufonduebackend.model.dto.response.AdminResponse;
 import au.edu.aufonduebackend.model.entity.Admin;
 import au.edu.aufonduebackend.repository.AdminRepository;
+import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,9 @@ public class AdminAccController {
 
     @Autowired
     private AdminRepository adminRepository;
+
+    @Autowired
+    private IssueRepository issueRepository;
 
     @GetMapping("/details")
     public ResponseEntity<?> getAdminDetails(@RequestParam String email) {
@@ -58,6 +62,24 @@ public class AdminAccController {
         Optional<Admin> adminOptional = adminService.findByEmail(email);
         boolean isAdmin = adminOptional.isPresent();
         return ResponseEntity.ok(isAdmin);
+    }
+
+    // Dashboard stats endpoint
+    @GetMapping("/issues/stats")
+    public ResponseEntity<Map<String, Long>> getIssueStats() {
+        long totalIssues = issueRepository.count();
+        long pendingIssues = issueRepository.countByStatus("PENDING");
+        long inProgressIssues = issueRepository.countByStatus("IN PROGRESS");
+        long completedIssues = issueRepository.countByStatus("COMPLETED");
+
+        long incompleteIssues = pendingIssues + inProgressIssues;
+
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("totalIssues", totalIssues);
+        stats.put("incompleteIssues", incompleteIssues);
+        stats.put("completedIssues", completedIssues);
+
+        return ResponseEntity.ok(stats);
     }
 
 
