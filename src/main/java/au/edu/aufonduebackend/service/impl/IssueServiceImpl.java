@@ -37,6 +37,12 @@ public class IssueServiceImpl implements IssueService {
     private final UserService userService;
     @Autowired(required = false)
     private IssueRemarkService remarkService;
+    @Autowired(required = false)
+    private au.edu.aufonduebackend.repository.UpdateRepository updateRepository;
+    @Autowired(required = false)
+    private au.edu.aufonduebackend.repository.IssueRemarkRepository issueRemarkRepository;
+    @Autowired(required = false)
+    private au.edu.aufonduebackend.repository.IssueRemarkHistoryRepository issueRemarkHistoryRepository;
 
     @Override
     @Transactional
@@ -193,6 +199,36 @@ public class IssueServiceImpl implements IssueService {
         Issue issue = issueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Issue not found with id: " + id));
 
+        // First, delete all related entities to avoid foreign key constraint violations
+        
+        // Delete all updates associated with this issue
+        if (updateRepository != null) {
+            try {
+                updateRepository.deleteByIssueId(id);
+            } catch (Exception e) {
+                System.err.println("Error deleting updates for issue " + id + ": " + e.getMessage());
+            }
+        }
+        
+        // Delete issue remark history
+        if (issueRemarkHistoryRepository != null) {
+            try {
+                issueRemarkHistoryRepository.deleteByIssueId(id);
+            } catch (Exception e) {
+                System.err.println("Error deleting remark history for issue " + id + ": " + e.getMessage());
+            }
+        }
+        
+        // Delete issue remarks
+        if (issueRemarkRepository != null) {
+            try {
+                issueRemarkRepository.deleteByIssue(issue);
+            } catch (Exception e) {
+                System.err.println("Error deleting remarks for issue " + id + ": " + e.getMessage());
+            }
+        }
+
+        // Delete media files from storage
         if (issue.getPhotoUrls() != null && !issue.getPhotoUrls().isEmpty()) {
             for (String photoUrl : issue.getPhotoUrls()) {
                 try {
@@ -213,6 +249,7 @@ public class IssueServiceImpl implements IssueService {
             }
         }
 
+        // Finally, delete the issue itself
         issueRepository.deleteById(id);
     }
 

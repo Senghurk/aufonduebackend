@@ -25,4 +25,8 @@ public interface IssueRemarkHistoryRepository extends JpaRepository<IssueRemarkH
     List<IssueRemarkHistory> findCompletedIssuesHistory();
     
     List<IssueRemarkHistory> findByAction(IssueRemarkHistory.Action action);
+    
+    void deleteByIssue(Issue issue);
+    
+    void deleteByIssueId(Long issueId);
 }

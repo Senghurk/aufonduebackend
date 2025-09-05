@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface UpdateRepository extends JpaRepository<Update, Long> {
    List<Update> findByIssueId(Long issueId);
+   void deleteByIssueId(Long issueId);
    }
