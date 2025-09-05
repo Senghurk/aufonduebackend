@@ -4,8 +4,11 @@ package au.edu.aufonduebackend.controller;
 import au.edu.aufonduebackend.model.dto.request.UpdateRequest;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.model.dto.response.UpdateResponse;
+import au.edu.aufonduebackend.model.entity.Admin;
 import au.edu.aufonduebackend.repository.IssueRepository;
+import au.edu.aufonduebackend.repository.AdminRepository;
 import au.edu.aufonduebackend.service.IssueService;
+import au.edu.aufonduebackend.service.IssueRemarkService;
 import au.edu.aufonduebackend.service.StaffService;
 import au.edu.aufonduebackend.service.UpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +29,18 @@ import java.util.Map;
 public class AdminIssueController {
     @Autowired
     public IssueService issueService;
+    
+    @Autowired(required = false)
     public StaffService staffService;
 
     @Autowired
     public UpdateService updateService;
-
+    
+    @Autowired(required = false)
+    public IssueRemarkService remarkService;
+    
+    @Autowired(required = false)
+    public AdminRepository adminRepository;
 
     @Autowired
     public IssueRepository issueRepository;
@@ -148,6 +158,30 @@ public class AdminIssueController {
         stats.put("completedIssues", completedIssues);
 
         return ResponseEntity.ok(stats);
+    }
+    
+    // Mark 'new' remark as viewed when details button is clicked
+    @PostMapping("/{issueId}/remark/view")
+    public ResponseEntity<String> markRemarkAsViewed(
+            @PathVariable Long issueId,
+            @RequestParam(required = false) String adminEmail) {
+        if (remarkService == null) {
+            // If remark service is not available, return success anyway
+            return ResponseEntity.ok("Remark service not available");
+        }
+        
+        try {
+            Admin viewedBy = null;
+            if (adminEmail != null && adminRepository != null) {
+                viewedBy = adminRepository.findByEmail(adminEmail).orElse(null);
+            }
+            
+            remarkService.markRemarkAsViewed(issueId, viewedBy);
+            return ResponseEntity.ok("Remark marked as viewed");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error marking remark as viewed: " + e.getMessage());
+        }
     }
 
 }

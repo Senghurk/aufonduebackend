@@ -27,4 +27,6 @@ public class IssueResponse {
     private boolean assigned;
     private StaffResponse assignedTo;
     private String priority;
+    private String remarkType;
+    private Boolean remarkViewed;
 }

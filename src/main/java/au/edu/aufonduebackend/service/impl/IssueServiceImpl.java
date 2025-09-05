@@ -5,15 +5,18 @@ import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.model.dto.response.StaffResponse;
 import au.edu.aufonduebackend.model.dto.response.UserResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
+import au.edu.aufonduebackend.model.entity.IssueRemark;
 import au.edu.aufonduebackend.model.entity.Staff;
 import au.edu.aufonduebackend.model.entity.User;
 import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.repository.StaffRepository;
 import au.edu.aufonduebackend.service.IssueService;
+import au.edu.aufonduebackend.service.IssueRemarkService;
 import au.edu.aufonduebackend.service.StorageService;
 import au.edu.aufonduebackend.service.UserService;
 import au.edu.aufonduebackend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +35,8 @@ public class IssueServiceImpl implements IssueService {
     private final StaffRepository staffRepository;
     private final StorageService storageService;
     private final UserService userService;
+    @Autowired(required = false)
+    private IssueRemarkService remarkService;
 
     @Override
     @Transactional
@@ -93,6 +98,12 @@ public class IssueServiceImpl implements IssueService {
         }
 
         Issue savedIssue = issueRepository.save(issue);
+        
+        // Create initial 'new' remark for the issue if service is available
+        if (remarkService != null) {
+            remarkService.createInitialRemarkForNewIssue(savedIssue);
+        }
+        
         return convertToResponse(savedIssue);
     }
 
@@ -253,6 +264,14 @@ public class IssueServiceImpl implements IssueService {
             staffResponse.setName(issue.getAssignedTo().getName());
             staffResponse.setEmail(issue.getAssignedTo().getEmail());
             response.setAssignedTo(staffResponse);
+        }
+        
+        // Add remark information if service is available
+        if (remarkService != null) {
+            remarkService.getRemarkByIssueId(issue.getId()).ifPresent(remark -> {
+                response.setRemarkType(remark.getRemarkType().getValue());
+                response.setRemarkViewed(remark.getIsViewed());
+            });
         }
 
         return response;

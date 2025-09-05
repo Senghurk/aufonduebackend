@@ -5,15 +5,20 @@ import au.edu.aufonduebackend.model.dto.response.UpdateResponse;
 import au.edu.aufonduebackend.model.entity.Issue;
 import au.edu.aufonduebackend.model.entity.Update;
 import au.edu.aufonduebackend.model.entity.User;
+import au.edu.aufonduebackend.model.entity.IssueRemark;
+import au.edu.aufonduebackend.model.entity.Admin;
 import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.repository.UpdateRepository;
+import au.edu.aufonduebackend.repository.AdminRepository;
 import au.edu.aufonduebackend.service.StorageService;
 import au.edu.aufonduebackend.service.UpdateService;
 import au.edu.aufonduebackend.service.FcmService;
+import au.edu.aufonduebackend.service.IssueRemarkService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +35,10 @@ public class UpdateServiceImpl implements UpdateService {
     private final IssueRepository issueRepository;
     private final StorageService storageService;
     private final FcmService fcmService; // ADD THIS
+    @Autowired(required = false)
+    private IssueRemarkService remarkService;
+    @Autowired(required = false)
+    private AdminRepository adminRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateServiceImpl.class);
     private static final List<String> VALID_STATUSES = Arrays.asList("PENDING", "IN PROGRESS", "COMPLETED");
@@ -43,6 +52,36 @@ public class UpdateServiceImpl implements UpdateService {
         // Validate status
         if (!VALID_STATUSES.contains(request.getStatus().toUpperCase())) {
             throw new IllegalArgumentException("Invalid status: " + request.getStatus());
+        }
+        
+        // Handle remarks if provided and services are available
+        if (request.getRemark() != null && !request.getRemark().trim().isEmpty() && remarkService != null) {
+            try {
+                IssueRemark.RemarkType remarkType = IssueRemark.RemarkType.fromString(request.getRemark());
+                
+                // Validate status-remark combination
+                if (!remarkService.validateStatusRemarkCombination(request.getStatus(), remarkType)) {
+                    String errorMessage = getRemarkValidationError(request.getStatus(), remarkType);
+                    throw new IllegalArgumentException(errorMessage);
+                }
+                
+                // Get admin who is making the update
+                Admin updatedBy = null;
+                if (request.getUpdatedBy() != null && adminRepository != null) {
+                    updatedBy = adminRepository.findByEmail(request.getUpdatedBy())
+                        .orElse(null);
+                }
+                
+                // Update the remark
+                remarkService.updateRemark(request.getIssueId(), remarkType, 
+                    request.getStatus().toUpperCase(), updatedBy);
+                    
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid remark: " + e.getMessage());
+            } catch (Exception e) {
+                logger.error("Error updating remark for issue {}: {}", request.getIssueId(), e.getMessage());
+                throw new RuntimeException("Failed to update remark: " + e.getMessage());
+            }
         }
 
         // Upload photos and collect URLs
@@ -120,5 +159,16 @@ public class UpdateServiceImpl implements UpdateService {
                         null
                 ))
                 .toList();
+    }
+    
+    private String getRemarkValidationError(String status, IssueRemark.RemarkType remarkType) {
+        String upperStatus = status.toUpperCase();
+        if ("COMPLETED".equals(upperStatus) && remarkType != IssueRemark.RemarkType.OK) {
+            return "When status is COMPLETED, remark must be OK. You selected: " + remarkType.getValue();
+        } else if (("PENDING".equals(upperStatus) || "IN PROGRESS".equals(upperStatus)) 
+                   && remarkType == IssueRemark.RemarkType.OK) {
+            return "OK remark can only be used with COMPLETED status. Current status: " + status;
+        }
+        return "Invalid status and remark combination: Status=" + status + ", Remark=" + remarkType.getValue();
     }
 }

@@ -15,6 +15,7 @@ public class UpdateRequest {
     private Long issueId;
     private String status;
     private String comment;
+    private String remark; // NEW, OK, RF, or PR
     private Instant updateTime;
     private String updatedBy;
 
