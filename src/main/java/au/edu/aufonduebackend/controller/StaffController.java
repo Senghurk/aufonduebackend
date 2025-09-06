@@ -62,11 +62,37 @@ public class StaffController {
 //        return ResponseEntity.ok(response);
 //    }
 
+    // Endpoint to check if staff can be deleted
+    @GetMapping("/{id}/can-delete")
+    public ResponseEntity<Map<String, Object>> canDeleteStaff(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            response.put("canDelete", staffService.canDeleteStaff(id));
+            response.put("incompleteReports", staffService.getIncompleteReportsCount(id));
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("canDelete", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
     // Endpoint to delete a staff member
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteStaff(@PathVariable Long id) {
-        staffService.deleteStaff(id);
-        return ResponseEntity.ok("Staff deleted successfully.");
+    public ResponseEntity<?> deleteStaff(@PathVariable Long id) {
+        try {
+            staffService.deleteStaff(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Staff deleted successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to delete staff with id {}: {}", id, e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
 

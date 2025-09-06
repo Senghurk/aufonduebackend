@@ -69,7 +69,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
 
 
-    @Query("SELECT i FROM Issue i WHERE i.assigned = false")
+    @Query("SELECT i FROM Issue i WHERE i.assigned = false AND LOWER(i.status) != 'completed'")
     List<Issue> findByAssignedFalse();
 
     @Query("SELECT i FROM Issue i WHERE i.assigned = true")
@@ -77,12 +77,26 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     List<Issue> findByAssignedTrueAndAssignedToId(Long staffId);
 
-    @Query("SELECT i FROM Issue i WHERE i.id = :id AND i.assigned = false")
+    @Query("SELECT i FROM Issue i WHERE i.id = :id AND i.assigned = false AND LOWER(i.status) != 'completed'")
     Issue getUnassignedIssueByID(@Param("id") Long id);
 
     @Query("SELECT i FROM Issue i WHERE LOWER(i.status) = LOWER(:status)")
     List<Issue> findCompletedIssues(@Param("status") String status);
 
     long countByStatus(String status);
+    
+    @Modifying
+    @Query("UPDATE Issue i SET i.assignedTo = null, i.assigned = false WHERE i.assignedTo.id = :staffId AND LOWER(i.status) != 'completed'")
+    void unassignIncompleteIssuesFromStaff(@Param("staffId") Long staffId);
+    
+    @Modifying
+    @Query("UPDATE Issue i SET i.assignedTo = null WHERE i.assignedTo.id = :staffId AND LOWER(i.status) = 'completed'")
+    void removeStaffFromCompletedIssues(@Param("staffId") Long staffId);
+    
+    @Query("SELECT COUNT(i) FROM Issue i WHERE i.assignedTo.id = :staffId AND LOWER(i.status) != 'completed'")
+    long countIncompleteAssignedIssues(@Param("staffId") Long staffId);
+    
+    @Query("SELECT i FROM Issue i WHERE i.assignedTo.id = :staffId AND LOWER(i.status) != 'completed'")
+    List<Issue> findIncompleteAssignedIssues(@Param("staffId") Long staffId);
 
 }

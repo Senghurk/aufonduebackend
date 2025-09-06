@@ -4,6 +4,7 @@ import au.edu.aufonduebackend.model.dto.request.StaffCreateRequest;
 import au.edu.aufonduebackend.model.dto.response.StaffResponse;
 import au.edu.aufonduebackend.model.entity.Staff;
 import au.edu.aufonduebackend.repository.StaffRepository;
+import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.service.FirebaseAuthService;
 import au.edu.aufonduebackend.service.StaffService;
 import org.springframework.data.domain.PageRequest;
@@ -24,14 +25,17 @@ public class StaffServiceImpl implements StaffService {
 
     private static final Logger logger = LoggerFactory.getLogger(StaffServiceImpl.class);
     private final StaffRepository staffRepository;
+    private final IssueRepository issueRepository;
     private final FirebaseAuthService firebaseAuthService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public StaffServiceImpl(StaffRepository staffRepository, 
+    public StaffServiceImpl(StaffRepository staffRepository,
+                           IssueRepository issueRepository,
                            @Autowired(required = false) FirebaseAuthService firebaseAuthService,
                            @Autowired(required = false) BCryptPasswordEncoder passwordEncoder) {
         this.staffRepository = staffRepository;
+        this.issueRepository = issueRepository;
         this.firebaseAuthService = firebaseAuthService;
         this.passwordEncoder = passwordEncoder != null ? passwordEncoder : new BCryptPasswordEncoder();
     }
@@ -52,11 +56,59 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteStaff(Long id) {
-        if (!staffRepository.existsById(id)) {
-            throw new RuntimeException("Staff not found with id: " + id);
+        Staff staff = staffRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+        
+        // Check if staff has any incomplete assigned reports
+        long incompleteReportsCount = issueRepository.countIncompleteAssignedIssues(id);
+        if (incompleteReportsCount > 0) {
+            String staffIdentifier = staff.getStaffId() != null ? staff.getStaffId() : staff.getName();
+            throw new RuntimeException(
+                "Cannot delete staff member '" + staffIdentifier + 
+                "' because they have " + incompleteReportsCount + 
+                " assigned report(s) that are not completed. " +
+                "All assigned reports must be marked as 'Completed' before deletion."
+            );
         }
+        
+        // Handle issue reassignment based on completion status
+        try {
+            // Unassign incomplete issues (they go back to unassigned pool)
+            issueRepository.unassignIncompleteIssuesFromStaff(id);
+            logger.info("Unassigned incomplete issues from staff: {}", 
+                staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id);
+            
+            // Remove staff reference from completed issues (but keep them as completed)
+            issueRepository.removeStaffFromCompletedIssues(id);
+            logger.info("Removed staff reference from completed issues for: {}", 
+                staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id);
+        } catch (Exception e) {
+            logger.warn("Failed to handle issue reassignment for staff {}: {}", 
+                staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id, e.getMessage());
+        }
+        
+        // Try to delete from Firebase if the user exists there
+        if (staff.getFirebaseUid() != null && !staff.getFirebaseUid().isEmpty() && firebaseAuthService != null) {
+            try {
+                firebaseAuthService.deleteUser(staff.getFirebaseUid());
+                logger.info("Deleted Firebase user for staff: {}", 
+                    staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id);
+            } catch (Exception e) {
+                logger.warn("Failed to delete Firebase user for staff {}: {}", 
+                    staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id, e.getMessage());
+                // Continue with deletion even if Firebase deletion fails
+            }
+        } else {
+            logger.info("No Firebase account to delete for staff: {}", 
+                staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id);
+        }
+        
+        // Delete from database
         staffRepository.deleteById(id);
+        logger.info("Staff deleted successfully: {}", 
+            staff.getStaffId() != null ? staff.getStaffId() : "legacy-" + id);
     }
 
     public Staff addStaff(Staff staff) {
@@ -254,5 +306,21 @@ public class StaffServiceImpl implements StaffService {
             logger.warn("Firebase service is not available");
             throw new RuntimeException("Password reset service is currently unavailable");
         }
+    }
+    
+    @Override
+    public boolean canDeleteStaff(Long staffId) {
+        if (!staffRepository.existsById(staffId)) {
+            throw new RuntimeException("Staff not found with id: " + staffId);
+        }
+        return issueRepository.countIncompleteAssignedIssues(staffId) == 0;
+    }
+    
+    @Override
+    public long getIncompleteReportsCount(Long staffId) {
+        if (!staffRepository.existsById(staffId)) {
+            throw new RuntimeException("Staff not found with id: " + staffId);
+        }
+        return issueRepository.countIncompleteAssignedIssues(staffId);
     }
 }

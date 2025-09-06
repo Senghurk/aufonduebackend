@@ -19,4 +19,6 @@ public interface StaffService {
     StaffResponse updateStaffPasswordByEmail(String email, String newPassword);  // Update password by email (for Firebase sync)
     Staff findByStaffId(String staffId);  // Find staff by staff ID
     void ensureStaffInFirebase(Long staffId);  // Ensure staff exists in Firebase
+    boolean canDeleteStaff(Long staffId);  // Check if staff can be deleted
+    long getIncompleteReportsCount(Long staffId);  // Get count of incomplete reports for a staff
 }

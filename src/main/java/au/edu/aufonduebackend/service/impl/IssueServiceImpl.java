@@ -302,6 +302,7 @@ public class IssueServiceImpl implements IssueService {
         if (issue.getAssignedTo() != null) {
             StaffResponse staffResponse = new StaffResponse();
             staffResponse.setId(issue.getAssignedTo().getId());
+            staffResponse.setStaffId(issue.getAssignedTo().getStaffId());
             staffResponse.setName(issue.getAssignedTo().getName());
             staffResponse.setEmail(issue.getAssignedTo().getEmail());
             response.setAssignedTo(staffResponse);
@@ -421,6 +422,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public List<IssueResponse> getUnassignedIssues(int page, int size) {
+        // Get unassigned issues excluding completed ones (completed issues never go back to unassigned)
         List<Issue> unassignedIssues = issueRepository.findByAssignedFalse();
         return unassignedIssues.stream()
                 .map(this::convertToResponse)

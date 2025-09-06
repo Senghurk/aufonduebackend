@@ -23,11 +23,9 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        logger.info("Checking for initial staff data...");
-        
         // Only add test data if no staff exists
         if (staffRepository.count() == 0) {
-            logger.info("No staff found. Adding test staff members...");
+            logger.info("Initializing default staff data...");
             
             // Create test staff 1
             if (!staffRepository.existsByStaffId("OM01")) {
@@ -59,9 +57,8 @@ public class DataInitializer implements CommandLineRunner {
                 logger.info("Created test staff: OM02");
             }
             
-            logger.info("Test staff initialization completed");
-        } else {
-            logger.info("Staff data already exists. Skipping initialization.");
+            logger.info("Default staff initialization completed");
         }
+        // Silent when data already exists - no need to log this every time
     }
 }
