@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 //Manages staff member data - staff account management
 @Repository
@@ -19,5 +20,11 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
             @Param("size") int size,
             @Param("offset") int offset
     );
+    
+    Optional<Staff> findByStaffId(String staffId);
+    Optional<Staff> findByEmail(String email);
+    Optional<Staff> findByFirebaseUid(String firebaseUid);
+    boolean existsByStaffId(String staffId);
+    boolean existsByEmail(String email);
 
    }

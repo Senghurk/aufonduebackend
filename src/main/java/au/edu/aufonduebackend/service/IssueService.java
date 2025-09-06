@@ -26,6 +26,7 @@ public interface IssueService {
     List<IssueResponse> getUnassignedIssues(int page, int size);
 
     List<IssueResponse> getAssignedIssues(int page, int size);
+    List<IssueResponse> getAssignedIssuesByStaff(Long staffId, int page, int size);
     IssueResponse getUnassignedIssueByID(Long id);
     List<IssueResponse>getCompletedIssues();
 

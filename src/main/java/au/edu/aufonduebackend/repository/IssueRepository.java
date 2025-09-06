@@ -75,6 +75,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Query("SELECT i FROM Issue i WHERE i.assigned = true")
     List<Issue> findByAssignedTrue();
 
+    List<Issue> findByAssignedTrueAndAssignedToId(Long staffId);
 
     @Query("SELECT i FROM Issue i WHERE i.id = :id AND i.assigned = false")
     Issue getUnassignedIssueByID(@Param("id") Long id);

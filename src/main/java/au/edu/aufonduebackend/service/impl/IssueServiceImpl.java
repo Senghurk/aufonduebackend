@@ -21,6 +21,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class IssueServiceImpl implements IssueService {
 
+    private static final Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);
+    
     private final IssueRepository issueRepository;
     private final StaffRepository staffRepository;
     private final StorageService storageService;
@@ -429,6 +433,21 @@ public class IssueServiceImpl implements IssueService {
         return assignedIssues.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IssueResponse> getAssignedIssuesByStaff(Long staffId, int page, int size) {
+        try {
+            logger.info("Fetching assigned issues for staff ID: {}", staffId);
+            List<Issue> assignedIssues = issueRepository.findByAssignedTrueAndAssignedToId(staffId);
+            logger.info("Found {} assigned issues for staff ID: {}", assignedIssues.size(), staffId);
+            return assignedIssues.stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error fetching assigned issues for staff ID: " + staffId, e);
+            return new ArrayList<>();
+        }
     }
 
     @Override

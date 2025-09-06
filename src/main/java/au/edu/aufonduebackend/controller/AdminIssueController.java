@@ -7,6 +7,7 @@ import au.edu.aufonduebackend.model.dto.response.UpdateResponse;
 import au.edu.aufonduebackend.model.entity.Admin;
 import au.edu.aufonduebackend.repository.IssueRepository;
 import au.edu.aufonduebackend.repository.AdminRepository;
+import au.edu.aufonduebackend.security.SecurityUtils;
 import au.edu.aufonduebackend.service.IssueService;
 import au.edu.aufonduebackend.service.IssueRemarkService;
 import au.edu.aufonduebackend.service.StaffService;
@@ -17,7 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,9 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/issues")
 public class AdminIssueController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(AdminIssueController.class);
+    
     @Autowired
     public IssueService issueService;
     
@@ -61,14 +68,27 @@ public class AdminIssueController {
 
 
     @DeleteMapping("/reports/{id}")
-    public ResponseEntity<Void> deleteReport(@PathVariable Long id) {
+    public ResponseEntity<?> deleteReport(@PathVariable Long id, 
+                                         @RequestHeader(value = "X-User-Type", required = false) String userType) {
+        
+        // Check if the user is an admin (NOT OM staff)
+        if (userType == null || !userType.equalsIgnoreCase("admin")) {
+            logger.warn("Unauthorized delete attempt by non-admin user type: {}", userType);
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Forbidden");
+            errorResponse.put("message", "Only administrators can delete reports. OM staff do not have permission to delete.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        }
+        
         try {
+            logger.info("Admin deleting report with ID: {}", id);
             // Delete the issue using the service method
             issueService.deleteIssue(id);
 
             // Return a success response with HTTP status 204 No Content (indicating successful deletion)
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
+            logger.error("Failed to delete report with ID: {}", id, e);
             // Handle the exception (e.g., issue not found)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -86,13 +106,56 @@ public class AdminIssueController {
     }
 
 
-    // Endpoint to get all assigned issues
+    // Endpoint to get all assigned issues (filtered by staff if staff is requesting)
     @GetMapping("/assigned")
     public ResponseEntity<List<IssueResponse>> getAssignedIssues(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader(value = "X-User-Type", required = false) String userType,
+            @RequestHeader(value = "X-User-Id", required = false) String userId
     ) {
-        List<IssueResponse> assignedIssues = issueService.getAssignedIssues(page, size);
+        List<IssueResponse> assignedIssues = new ArrayList<>();
+        
+        try {
+            logger.info("Fetching assigned issues - UserType: {}, UserId: {}", userType, userId);
+            
+            // Check if request is from staff - if so, only return their assigned issues
+            if ("staff".equalsIgnoreCase(userType) || "om_staff".equalsIgnoreCase(userType)) {
+                if (userId != null && !userId.isEmpty()) {
+                    try {
+                        Long staffId = Long.parseLong(userId);
+                        // Get all assigned issues and filter by staff ID
+                        List<IssueResponse> allAssigned = issueService.getAssignedIssues(page, size);
+                        
+                        // Filter to only show issues assigned to this staff member
+                        for (IssueResponse issue : allAssigned) {
+                            if (issue.getAssignedTo() != null && 
+                                issue.getAssignedTo().getId() != null &&
+                                issue.getAssignedTo().getId().equals(staffId)) {
+                                assignedIssues.add(issue);
+                            }
+                        }
+                        
+                        logger.info("Staff {} fetching their assigned issues, found {} issues out of {} total", 
+                                   staffId, assignedIssues.size(), allAssigned.size());
+                    } catch (NumberFormatException e) {
+                        logger.error("Invalid staff ID format: {}", userId);
+                        // Return empty list for invalid format
+                    }
+                } else {
+                    logger.warn("Staff request without user ID - returning empty list");
+                }
+            } else {
+                // Admin or other user type - return all assigned issues
+                assignedIssues = issueService.getAssignedIssues(page, size);
+                logger.info("Admin/other fetching all assigned issues, found {} issues", assignedIssues.size());
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error fetching assigned issues", e);
+            // Return empty list on error instead of throwing
+        }
+        
         return ResponseEntity.ok(assignedIssues);
     }
 

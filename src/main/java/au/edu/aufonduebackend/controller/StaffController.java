@@ -1,10 +1,15 @@
 package au.edu.aufonduebackend.controller;
 
+import au.edu.aufonduebackend.model.dto.request.PasswordResetRequest;
+import au.edu.aufonduebackend.model.dto.request.StaffCreateRequest;
 import au.edu.aufonduebackend.model.dto.response.StaffResponse;
 import au.edu.aufonduebackend.service.StaffService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 // Endpoints for staff account management
@@ -63,8 +68,67 @@ public class StaffController {
 
 
 
-    // Endpoint to add mock staff data
+    // Endpoint to create a new staff member
     @PostMapping
+    public ResponseEntity<StaffResponse> createStaff(@RequestBody StaffCreateRequest request) {
+        try {
+            StaffResponse newStaff = staffService.createStaff(request);
+            return new ResponseEntity<>(newStaff, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // Endpoint to reset staff password
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetStaffPassword(@RequestBody PasswordResetRequest request) {
+        try {
+            String resetLink = staffService.resetStaffPassword(request.getStaffId());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Password reset link has been sent to staff email");
+            response.put("email", request.getStaffEmail());
+            response.put("resetLink", resetLink);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+    
+    // Endpoint to update password after reset
+    @PostMapping("/update-password")
+    public ResponseEntity<Map<String, Object>> updatePassword(@RequestBody Map<String, String> request) {
+        try {
+            String staffId = request.get("staffId");
+            String newPassword = request.get("newPassword");
+            
+            if (staffId == null || newPassword == null) {
+                throw new RuntimeException("Staff ID and new password are required");
+            }
+            
+            StaffResponse updatedStaff = staffService.updateStaffPassword(staffId, newPassword);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Password updated successfully");
+            response.put("staff", updatedStaff);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+    
+    // Endpoint to add mock staff data
+    @PostMapping("/mock")
     public ResponseEntity<String> addMockStaff() {
         staffService.addMockData();
         return ResponseEntity.ok("Mock staff data added successfully!");

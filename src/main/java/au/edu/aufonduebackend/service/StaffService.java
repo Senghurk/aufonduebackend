@@ -1,6 +1,7 @@
 package au.edu.aufonduebackend.service;
 
 
+import au.edu.aufonduebackend.model.dto.request.StaffCreateRequest;
 import au.edu.aufonduebackend.model.dto.response.StaffResponse;
 import au.edu.aufonduebackend.model.entity.Staff;
 
@@ -12,4 +13,8 @@ public interface StaffService {
     void deleteStaff(Long id);  // Delete a staff member
     void addMockData();
     List<StaffResponse> getAllStaffWithoutPagination();
+    StaffResponse createStaff(StaffCreateRequest request);  // Create new staff
+    String resetStaffPassword(Long staffId);  // Reset staff password
+    StaffResponse updateStaffPassword(String staffId, String newPassword);  // Update password after reset
+    Staff findByStaffId(String staffId);  // Find staff by staff ID
 }
