@@ -48,8 +48,14 @@ public class FirebaseAuthService {
     
     public String generatePasswordResetLink(String email) throws FirebaseAuthException {
         try {
+            // Generate password reset link with action code settings
+            // This will trigger Firebase to send the email using the configured template
             String link = firebaseAuth.generatePasswordResetLink(email);
-            logger.info("Password reset link generated for: {}", email);
+            logger.info("Password reset email triggered for: {}", email);
+            logger.info("Reset link generated: {}", link);
+            
+            // Note: Firebase will automatically send the email using the template
+            // configured in Firebase Console under Authentication > Templates
             return link;
         } catch (FirebaseAuthException e) {
             logger.error("Failed to generate password reset link for: {}", email, e);

@@ -165,32 +165,16 @@ public class StaffServiceImpl implements StaffService {
             throw new RuntimeException("Staff member has no email address");
         }
         
-        if (firebaseAuthService != null) {
-            try {
-                // Generate password reset link using Firebase
-                String resetLink = firebaseAuthService.generatePasswordResetLink(staff.getEmail());
-                
-                // Update database to track reset request
-                staff.setPasswordResetRequestedAt(LocalDateTime.now());
-                staff.setFirstLogin(true);
-                staffRepository.save(staff);
-                
-                logger.info("Password reset link generated for staff: {}", staff.getStaffId());
-                return resetLink;
-            } catch (Exception e) {
-                logger.error("Failed to generate password reset link for staff: {}", staff.getStaffId(), e);
-                throw new RuntimeException("Failed to generate password reset link: " + e.getMessage());
-            }
-        } else {
-            // If Firebase is not available, reset to default password
-            staff.setPassword(passwordEncoder.encode("OMstaff123"));
-            staff.setPasswordResetRequestedAt(LocalDateTime.now());
-            staff.setFirstLogin(true);
-            staffRepository.save(staff);
-            
-            logger.info("Password reset to default for staff: {}", staff.getStaffId());
-            return "Password has been reset to default: OMstaff123";
-        }
+        // Just track that a reset was requested
+        // The actual email sending is handled by the frontend using Firebase Client SDK
+        staff.setPasswordResetRequestedAt(LocalDateTime.now());
+        staff.setFirstLogin(false); // Don't force first login since they're resetting
+        staffRepository.save(staff);
+        
+        logger.info("Password reset tracked for staff: {} ({})", staff.getStaffId(), staff.getEmail());
+        
+        // Return success message
+        return "Password reset request tracked. Email will be sent via Firebase.";
     }
     
     @Override
@@ -219,8 +203,56 @@ public class StaffServiceImpl implements StaffService {
     }
     
     @Override
+    public StaffResponse updateStaffPasswordByEmail(String email, String newPassword) {
+        Staff staff = staffRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Staff not found with email: " + email));
+        
+        // Update password in database
+        staff.setPassword(passwordEncoder.encode(newPassword));
+        staff.setFirstLogin(false);
+        staff.setPasswordResetCompletedAt(LocalDateTime.now());
+        staff.setUpdatedAt(LocalDateTime.now());
+        
+        // Update password in Firebase if user exists and service is available
+        if (staff.getFirebaseUid() != null && firebaseAuthService != null) {
+            try {
+                firebaseAuthService.updatePassword(staff.getFirebaseUid(), newPassword);
+            } catch (Exception e) {
+                logger.error("Failed to update Firebase password for staff: {}", staff.getStaffId(), e);
+                // Continue even if Firebase update fails
+            }
+        }
+        
+        Staff updatedStaff = staffRepository.save(staff);
+        return convertToResponse(updatedStaff);
+    }
+    
+    @Override
     public Staff findByStaffId(String staffId) {
         return staffRepository.findByStaffId(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found with staff ID: " + staffId));
+    }
+    
+    @Override
+    public void ensureStaffInFirebase(Long staffId) {
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffId));
+        
+        // If Firebase UID is null or empty, create Firebase user
+        if ((staff.getFirebaseUid() == null || staff.getFirebaseUid().isEmpty()) && firebaseAuthService != null) {
+            try {
+                logger.info("Creating Firebase user for staff: {} ({})", staff.getStaffId(), staff.getEmail());
+                String firebaseUid = firebaseAuthService.createUserForStaff(staff.getEmail(), staff.getStaffId());
+                staff.setFirebaseUid(firebaseUid);
+                staffRepository.save(staff);
+                logger.info("Firebase user created successfully for staff: {}", staff.getStaffId());
+            } catch (Exception e) {
+                logger.error("Failed to create Firebase user for staff: {}", staff.getStaffId(), e);
+                throw new RuntimeException("Failed to create Firebase account for staff. Email may already be in use or invalid: " + e.getMessage());
+            }
+        } else if (firebaseAuthService == null) {
+            logger.warn("Firebase service is not available");
+            throw new RuntimeException("Password reset service is currently unavailable");
+        }
     }
 }

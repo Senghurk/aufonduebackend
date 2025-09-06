@@ -7,6 +7,8 @@ import au.edu.aufonduebackend.service.StaffService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.Map;
 @RequestMapping("/api/staff")
 public class StaffController {
 
+    private static final Logger logger = LoggerFactory.getLogger(StaffController.class);
     private final StaffService staffService;
 
     public StaffController(StaffService staffService) {
@@ -83,6 +86,9 @@ public class StaffController {
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, Object>> resetStaffPassword(@RequestBody PasswordResetRequest request) {
         try {
+            // First ensure the staff member exists in Firebase
+            staffService.ensureStaffInFirebase(request.getStaffId());
+            
             String resetLink = staffService.resetStaffPassword(request.getStaffId());
             
             Map<String, Object> response = new HashMap<>();
@@ -127,11 +133,71 @@ public class StaffController {
         }
     }
     
+    // Endpoint to update password from Firebase (after Firebase reset)
+    @PostMapping("/update-password-firebase")
+    public ResponseEntity<Map<String, Object>> updatePasswordFromFirebase(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String newPassword = request.get("newPassword");
+            
+            if (email == null || newPassword == null) {
+                throw new RuntimeException("Email and new password are required");
+            }
+            
+            // Find staff by email and update password
+            StaffResponse updatedStaff = staffService.updateStaffPasswordByEmail(email, newPassword);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Password synced with backend successfully");
+            response.put("staff", updatedStaff);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+    
     // Endpoint to add mock staff data
     @PostMapping("/mock")
     public ResponseEntity<String> addMockStaff() {
         staffService.addMockData();
         return ResponseEntity.ok("Mock staff data added successfully!");
+    }
+    
+    // Endpoint to sync all staff with Firebase
+    @PostMapping("/sync-firebase")
+    public ResponseEntity<Map<String, Object>> syncStaffWithFirebase() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<StaffResponse> allStaff = staffService.getAllStaffWithoutPagination();
+            int synced = 0;
+            int failed = 0;
+            
+            for (StaffResponse staffResponse : allStaff) {
+                try {
+                    staffService.ensureStaffInFirebase(staffResponse.getId());
+                    synced++;
+                } catch (Exception e) {
+                    failed++;
+                    logger.error("Failed to sync staff {} with Firebase: {}", staffResponse.getEmail(), e.getMessage());
+                }
+            }
+            
+            response.put("success", true);
+            response.put("message", String.format("Sync completed. Synced: %d, Failed: %d", synced, failed));
+            response.put("synced", synced);
+            response.put("failed", failed);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Failed to sync staff with Firebase: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 }
 

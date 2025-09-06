@@ -16,5 +16,7 @@ public interface StaffService {
     StaffResponse createStaff(StaffCreateRequest request);  // Create new staff
     String resetStaffPassword(Long staffId);  // Reset staff password
     StaffResponse updateStaffPassword(String staffId, String newPassword);  // Update password after reset
+    StaffResponse updateStaffPasswordByEmail(String email, String newPassword);  // Update password by email (for Firebase sync)
     Staff findByStaffId(String staffId);  // Find staff by staff ID
+    void ensureStaffInFirebase(Long staffId);  // Ensure staff exists in Firebase
 }
