@@ -1,7 +1,9 @@
 package au.edu.aufonduebackend.controller;
 
 import au.edu.aufonduebackend.model.entity.Staff;
+import au.edu.aufonduebackend.model.entity.Admin;
 import au.edu.aufonduebackend.service.StaffService;
+import au.edu.aufonduebackend.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,6 +27,9 @@ public class AuthController {
     
     @Autowired
     private StaffService staffService;
+    
+    @Autowired
+    private AdminService adminService;
     
     @Autowired(required = false)
     private BCryptPasswordEncoder passwordEncoder;
@@ -37,7 +43,7 @@ public class AuthController {
         
         try {
             // TODO: Implement proper admin authentication with Microsoft OAuth
-            // For now, we'll validate against a hardcoded admin list
+            // For now, we'll validate against the admin table in the database
             // In production, this should verify the Microsoft OAuth token
             
             if (email == null || !email.endsWith("@au.edu")) {
@@ -46,19 +52,16 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(response);
             }
             
-            // Hardcoded admin accounts for testing
-            // Replace with database lookup in production
-            List<String> allowedAdmins = List.of(
-                "u6440041@au.edu",
-                "admin@au.edu",
-                "test.admin@au.edu"
-            );
+            // Fetch admin from database
+            Optional<Admin> adminOpt = adminService.findByEmail(email.toLowerCase());
             
-            if (!allowedAdmins.contains(email.toLowerCase())) {
+            if (!adminOpt.isPresent()) {
                 response.put("success", false);
                 response.put("message", "You are not authorized as an admin");
                 return ResponseEntity.status(403).body(response);
             }
+            
+            Admin admin = adminOpt.get();
             
             // Success
             response.put("success", true);
@@ -66,8 +69,9 @@ public class AuthController {
             
             Map<String, Object> data = new HashMap<>();
             data.put("userType", "admin");
-            data.put("userId", 1L);
-            data.put("name", email.split("@")[0]);
+            data.put("userId", admin.getId());
+            data.put("name", admin.getUsername()); // Use username from database
+            data.put("displayName", admin.getUsername()); // Also add displayName for clarity
             data.put("email", email);
             data.put("firstLogin", false);
             data.put("token", "admin-token-" + System.currentTimeMillis());

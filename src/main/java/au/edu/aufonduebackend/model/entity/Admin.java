@@ -25,6 +25,8 @@ public class Admin {
     @Column(nullable = false)
     private String username;
 
-
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
 }

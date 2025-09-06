@@ -25,6 +25,7 @@ public class AdminServiceImpl implements AdminService {
         response.setId(admin.getId());
         response.setUsername(admin.getUsername());
         response.setEmail(admin.getEmail());
+        response.setCreatedAt(admin.getCreatedAt());
         return response;
     }
     @Override
