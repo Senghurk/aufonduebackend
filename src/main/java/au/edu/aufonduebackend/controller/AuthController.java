@@ -3,9 +3,12 @@ package au.edu.aufonduebackend.controller;
 import au.edu.aufonduebackend.model.entity.Staff;
 import au.edu.aufonduebackend.service.StaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -16,6 +19,8 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {"http://localhost:3000", "https://au-fondue-web.vercel.app"})
 public class AuthController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
     @Autowired
     private StaffService staffService;
@@ -97,18 +102,26 @@ public class AuthController {
             
             // Verify password
             boolean passwordMatches = false;
-            if (staff.getPassword() != null) {
+            
+            // CRITICAL SECURITY FIX: Only allow default password on first login
+            if (staff.getFirstLogin() && "OMstaff123".equals(password)) {
+                // Default password is ONLY valid for first login
+                passwordMatches = true;
+            } else if (!staff.getFirstLogin() && "OMstaff123".equals(password)) {
+                // SECURITY WARNING: Trying to use default password after it's been changed
+                response.put("success", false);
+                response.put("message", "Default password no longer valid. Your password has been changed. Please use your new password to login.");
+                response.put("errorType", "DEFAULT_PASSWORD_EXPIRED");
+                logger.warn("Staff {} attempted to use default password after password change", omId);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            } else if (staff.getPassword() != null) {
+                // After first login, only the actual password works
                 if (passwordEncoder != null) {
                     passwordMatches = passwordEncoder.matches(password, staff.getPassword());
                 } else {
                     // Fallback to simple comparison if encoder not available (for testing only)
                     passwordMatches = password.equals(staff.getPassword());
                 }
-            }
-            
-            // Check for default password
-            if (!passwordMatches && "OMstaff123".equals(password)) {
-                passwordMatches = true;
             }
             
             if (!passwordMatches) {
@@ -156,18 +169,19 @@ public class AuthController {
             
             // Verify current password
             boolean passwordMatches = false;
-            if (staff.getPassword() != null) {
+            
+            // CRITICAL SECURITY FIX: Only allow default password as current password on first login
+            if (staff.getFirstLogin() && "OMstaff123".equals(currentPassword)) {
+                // Default password is ONLY valid as current password if it's still first login
+                passwordMatches = true;
+            } else if (staff.getPassword() != null) {
+                // After first login, only the actual password works
                 if (passwordEncoder != null) {
                     passwordMatches = passwordEncoder.matches(currentPassword, staff.getPassword());
                 } else {
                     // Fallback to simple comparison if encoder not available (for testing only)
                     passwordMatches = currentPassword.equals(staff.getPassword());
                 }
-            }
-            
-            // Check for default password
-            if (!passwordMatches && "OMstaff123".equals(currentPassword)) {
-                passwordMatches = true;
             }
             
             if (!passwordMatches) {
