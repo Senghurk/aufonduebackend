@@ -1,5 +1,6 @@
 package au.edu.aufonduebackend.service;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
@@ -13,19 +14,30 @@ import org.slf4j.LoggerFactory;
 public class FirebaseAuthService {
     
     private static final Logger logger = LoggerFactory.getLogger(FirebaseAuthService.class);
-    private final FirebaseAuth firebaseAuth;
+    private FirebaseAuth firebaseAuth;
+    private boolean isInitialized = false;
     
     public FirebaseAuthService() {
         try {
-            this.firebaseAuth = FirebaseAuth.getInstance();
-            logger.info("Firebase Auth Service initialized successfully");
+            if (!FirebaseApp.getApps().isEmpty()) {
+                this.firebaseAuth = FirebaseAuth.getInstance();
+                this.isInitialized = true;
+                logger.info("Firebase Auth Service initialized successfully");
+            } else {
+                logger.warn("Firebase App not initialized - Firebase Auth Service will be disabled");
+                this.isInitialized = false;
+            }
         } catch (Exception e) {
-            logger.error("Failed to initialize Firebase Auth Service", e);
-            throw new RuntimeException("Firebase initialization failed", e);
+            logger.error("Failed to initialize Firebase Auth Service - service will be disabled", e);
+            this.isInitialized = false;
         }
     }
     
     public String createUserForStaff(String email, String staffId) throws FirebaseAuthException {
+        if (!isInitialized) {
+            logger.warn("Firebase Auth Service not initialized - cannot create user");
+            return null;
+        }
         try {
             UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                     .setEmail(email)
@@ -47,6 +59,10 @@ public class FirebaseAuthService {
     }
     
     public String generatePasswordResetLink(String email) throws FirebaseAuthException {
+        if (!isInitialized) {
+            logger.warn("Firebase Auth Service not initialized - cannot generate password reset link");
+            return null;
+        }
         try {
             // Generate password reset link with action code settings
             // This will trigger Firebase to send the email using the configured template
@@ -64,6 +80,10 @@ public class FirebaseAuthService {
     }
     
     public void updatePassword(String uid, String newPassword) throws FirebaseAuthException {
+        if (!isInitialized) {
+            logger.warn("Firebase Auth Service not initialized - cannot update password");
+            return;
+        }
         UserRecord.UpdateRequest request = new UserRecord.UpdateRequest(uid)
                 .setPassword(newPassword);
         
@@ -72,10 +92,18 @@ public class FirebaseAuthService {
     }
     
     public UserRecord getUserByEmail(String email) throws FirebaseAuthException {
+        if (!isInitialized) {
+            logger.warn("Firebase Auth Service not initialized - cannot get user by email");
+            return null;
+        }
         return firebaseAuth.getUserByEmail(email);
     }
     
     public void deleteUser(String uid) throws FirebaseAuthException {
+        if (!isInitialized) {
+            logger.warn("Firebase Auth Service not initialized - cannot delete user");
+            return;
+        }
         firebaseAuth.deleteUser(uid);
         logger.info("Firebase user deleted: {}", uid);
     }

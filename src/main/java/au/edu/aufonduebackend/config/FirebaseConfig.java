@@ -45,8 +45,13 @@ public class FirebaseConfig {
                 logger.info("Firebase initialized successfully");
             }
         } catch (IOException e) {
-            logger.error("Failed to initialize Firebase", e);
-            throw new RuntimeException("Failed to initialize Firebase", e);
+            logger.error("Failed to initialize Firebase - Firebase features will be disabled", e);
+            logger.warn("Firebase is not initialized. Password reset and other Firebase features will not work.");
+            // Don't throw exception - allow the app to start without Firebase
+        } catch (Exception e) {
+            logger.error("Unexpected error initializing Firebase - Firebase features will be disabled", e);
+            logger.warn("Firebase is not initialized. Password reset and other Firebase features will not work.");
+            // Don't throw exception - allow the app to start without Firebase
         }
     }
 }
