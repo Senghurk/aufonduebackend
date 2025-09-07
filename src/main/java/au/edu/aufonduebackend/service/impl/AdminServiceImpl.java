@@ -61,4 +61,10 @@ public class AdminServiceImpl implements AdminService {
         return adminRepository.findByEmail(email);
     }
 
+    @Override
+    public void updateAdminWithMicrosoftInfo(Admin admin) {
+        // Simply save the admin with updated Microsoft display name
+        adminRepository.save(admin);
+    }
+
 }

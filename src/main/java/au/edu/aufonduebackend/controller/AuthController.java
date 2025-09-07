@@ -37,6 +37,8 @@ public class AuthController {
     public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String accessToken = request.get("accessToken");
+        String displayName = request.get("displayName"); // Get Microsoft display name
+        String uid = request.get("uid"); // Get Firebase UID
         
         Map<String, Object> response = new HashMap<>();
         
@@ -62,6 +64,14 @@ public class AuthController {
             
             Admin admin = adminOpt.get();
             
+            // Update admin's username with Microsoft display name if provided
+            if (displayName != null && !displayName.trim().isEmpty()) {
+                // Update the admin's username to match their Microsoft display name
+                admin.setUsername(displayName);
+                adminService.updateAdminWithMicrosoftInfo(admin);
+                logger.info("Updated admin {} username to Microsoft display name: {}", email, displayName);
+            }
+            
             // Success
             response.put("success", true);
             response.put("message", "Admin login successful");
@@ -69,8 +79,8 @@ public class AuthController {
             Map<String, Object> data = new HashMap<>();
             data.put("userType", "admin");
             data.put("userId", admin.getId());
-            data.put("name", admin.getUsername()); // Use username from database
-            data.put("displayName", admin.getUsername()); // Also add displayName for clarity
+            data.put("name", displayName != null ? displayName : admin.getUsername()); // Use Microsoft display name if available
+            data.put("displayName", displayName != null ? displayName : admin.getUsername());
             data.put("email", email);
             data.put("firstLogin", false);
             data.put("token", "admin-token-" + System.currentTimeMillis());

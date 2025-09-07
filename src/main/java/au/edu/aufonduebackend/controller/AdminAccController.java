@@ -63,6 +63,13 @@ public class AdminAccController {
             return ResponseEntity.badRequest().body(error);
         }
         
+        // Set a temporary username that will be replaced with Microsoft display name on first login
+        // If username is provided, use it as a placeholder, otherwise use email prefix
+        if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
+            String emailPrefix = admin.getEmail().substring(0, admin.getEmail().indexOf("@"));
+            admin.setUsername(emailPrefix);
+        }
+        
         AdminResponse createdAdmin = adminService.addAdmin(admin);
         return new ResponseEntity<>(createdAdmin, HttpStatus.CREATED);
     }

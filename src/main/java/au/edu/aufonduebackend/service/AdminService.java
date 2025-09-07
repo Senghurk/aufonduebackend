@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface AdminService {
     List<AdminResponse> getAllAdmins();
     AdminResponse addAdmin(Admin admin);
-
+    void updateAdminWithMicrosoftInfo(Admin admin);
 
     Optional<Admin> findByEmail(String email);
 }

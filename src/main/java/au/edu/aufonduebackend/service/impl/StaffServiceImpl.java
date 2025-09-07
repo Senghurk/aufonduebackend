@@ -323,4 +323,22 @@ public class StaffServiceImpl implements StaffService {
         }
         return issueRepository.countIncompleteAssignedIssues(staffId);
     }
+    
+    @Override
+    public StaffResponse updateStaffName(Long id, String newName) {
+        Staff staff = staffRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Staff not found with id: " + id));
+        
+        // Validate new name
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new RuntimeException("Staff name cannot be empty");
+        }
+        
+        // Update the name
+        staff.setName(newName.trim());
+        staff.setUpdatedAt(LocalDateTime.now());
+        
+        Staff updatedStaff = staffRepository.save(staff);
+        return convertToResponse(updatedStaff);
+    }
 }

@@ -62,6 +62,49 @@ public class StaffController {
 //        return ResponseEntity.ok(response);
 //    }
 
+    // Endpoint to update staff name
+    @PutMapping("/{id}/name")
+    public ResponseEntity<?> updateStaffName(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request) {
+        try {
+            String newName = request.get("name");
+            
+            if (newName == null || newName.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "Staff name cannot be empty");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            StaffResponse updatedStaff = staffService.updateStaffName(id, newName.trim());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Staff name updated successfully");
+            response.put("staff", updatedStaff);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            
+            if (e.getMessage().contains("Staff not found")) {
+                errorResponse.put("message", "Staff member not found");
+                return ResponseEntity.notFound().build();
+            } else {
+                errorResponse.put("message", e.getMessage());
+            }
+            
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Failed to update staff name: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     // Endpoint to check if staff can be deleted
     @GetMapping("/{id}/can-delete")
     public ResponseEntity<Map<String, Object>> canDeleteStaff(@PathVariable Long id) {

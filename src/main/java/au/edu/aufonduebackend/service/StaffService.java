@@ -21,4 +21,5 @@ public interface StaffService {
     void ensureStaffInFirebase(Long staffId);  // Ensure staff exists in Firebase
     boolean canDeleteStaff(Long staffId);  // Check if staff can be deleted
     long getIncompleteReportsCount(Long staffId);  // Get count of incomplete reports for a staff
+    StaffResponse updateStaffName(Long id, String newName);  // Update staff name
 }
