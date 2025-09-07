@@ -25,7 +25,16 @@ public class AdminServiceImpl implements AdminService {
         response.setId(admin.getId());
         response.setUsername(admin.getUsername());
         response.setEmail(admin.getEmail());
-        response.setCreatedAt(admin.getCreatedAt());
+        
+        // Handle null createdAt for existing records
+        if (admin.getCreatedAt() != null) {
+            response.setCreatedAt(admin.getCreatedAt());
+        } else {
+            // For existing records without createdAt, set it to a default value
+            // This ensures the frontend doesn't show N/A
+            response.setCreatedAt(java.time.LocalDateTime.now());
+        }
+        
         return response;
     }
     @Override

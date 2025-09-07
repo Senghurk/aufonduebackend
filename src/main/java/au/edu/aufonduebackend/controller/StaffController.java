@@ -99,12 +99,27 @@ public class StaffController {
 
     // Endpoint to create a new staff member
     @PostMapping
-    public ResponseEntity<StaffResponse> createStaff(@RequestBody StaffCreateRequest request) {
+    public ResponseEntity<?> createStaff(@RequestBody StaffCreateRequest request) {
         try {
             StaffResponse newStaff = staffService.createStaff(request);
             return new ResponseEntity<>(newStaff, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            
+            // Check if error is about duplicate OM ID
+            if (e.getMessage() != null && e.getMessage().contains("Staff ID already exists")) {
+                errorResponse.put("message", "This OM ID (" + request.getStaffId() + ") is already assigned to another staff member. Please use a different OM ID.");
+                errorResponse.put("errorType", "DUPLICATE_OM_ID");
+            } else if (e.getMessage() != null && e.getMessage().contains("Email already exists")) {
+                errorResponse.put("message", "This email address is already registered. Please use a different email.");
+                errorResponse.put("errorType", "DUPLICATE_EMAIL");
+            } else {
+                errorResponse.put("message", e.getMessage() != null ? e.getMessage() : "Failed to create staff member");
+                errorResponse.put("errorType", "GENERAL_ERROR");
+            }
+            
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
     
