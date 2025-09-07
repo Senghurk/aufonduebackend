@@ -290,8 +290,19 @@ public class StaffServiceImpl implements StaffService {
         Staff staff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffId));
         
+        // Check if email is valid
+        if (staff.getEmail() == null || staff.getEmail().isEmpty()) {
+            throw new RuntimeException("Staff member has no email address configured");
+        }
+        
+        // If Firebase service is not available
+        if (firebaseAuthService == null) {
+            logger.warn("Firebase service is not available");
+            throw new RuntimeException("Password reset service is currently unavailable. Please contact system administrator.");
+        }
+        
         // If Firebase UID is null or empty, create Firebase user
-        if ((staff.getFirebaseUid() == null || staff.getFirebaseUid().isEmpty()) && firebaseAuthService != null) {
+        if (staff.getFirebaseUid() == null || staff.getFirebaseUid().isEmpty()) {
             try {
                 logger.info("Creating Firebase user for staff: {} ({})", staff.getStaffId(), staff.getEmail());
                 String firebaseUid = firebaseAuthService.createUserForStaff(staff.getEmail(), staff.getStaffId());
@@ -299,12 +310,34 @@ public class StaffServiceImpl implements StaffService {
                 staffRepository.save(staff);
                 logger.info("Firebase user created successfully for staff: {}", staff.getStaffId());
             } catch (Exception e) {
-                logger.error("Failed to create Firebase user for staff: {}", staff.getStaffId(), e);
-                throw new RuntimeException("Failed to create Firebase account for staff. Email may already be in use or invalid: " + e.getMessage());
+                logger.error("Failed to create Firebase user for staff: {} - {}", staff.getStaffId(), e.getMessage());
+                
+                // If user already exists, try to get the existing user and update our record
+                if (e.getMessage() != null && e.getMessage().contains("already exists")) {
+                    try {
+                        com.google.firebase.auth.UserRecord existingUser = firebaseAuthService.getUserByEmail(staff.getEmail());
+                        staff.setFirebaseUid(existingUser.getUid());
+                        staffRepository.save(staff);
+                        logger.info("Found existing Firebase user for staff: {}, updated record", staff.getStaffId());
+                        return; // Success - user exists
+                    } catch (Exception e2) {
+                        logger.error("Failed to retrieve existing Firebase user: {}", e2.getMessage());
+                    }
+                }
+                
+                // Provide more specific error messages
+                String errorMsg = "Failed to setup Firebase authentication for " + staff.getEmail() + ". ";
+                if (e.getMessage() != null && e.getMessage().contains("invalid")) {
+                    errorMsg += "The email address may be invalid.";
+                } else if (e.getMessage() != null && e.getMessage().contains("already exists")) {
+                    errorMsg += "The email may be associated with another account.";
+                } else {
+                    errorMsg += "Please contact system administrator.";
+                }
+                throw new RuntimeException(errorMsg);
             }
-        } else if (firebaseAuthService == null) {
-            logger.warn("Firebase service is not available");
-            throw new RuntimeException("Password reset service is currently unavailable");
+        } else {
+            logger.info("Staff {} already has Firebase UID: {}", staff.getStaffId(), staff.getFirebaseUid());
         }
     }
     
