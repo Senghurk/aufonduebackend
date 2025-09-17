@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class AufonduebackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AufonduebackendApplication.class, args);
+
 		
 	}
 }
