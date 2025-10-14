@@ -93,9 +93,9 @@ OpenAPI documentation available at: `http://localhost:8080/swagger-ui.html`
 - Azure Blob Storage for secure file storage
 
 ## Related Documentation
-- [Frontend Setup](../documentations/developer/frontend-setup.md) - Next.js Dashboard
-- [Mobile App Setup](../documentations/developer/mobile-app-setup.md) - Android App
-- [System Architecture](../documentations/AUFondue%20-%20System%20Architecture.png) - Architecture Diagram
+- [Frontend Setup](./documentations/developer/frontend-setup.md) - Next.js Dashboard
+- [Mobile App Setup](./documentations/developer/mobile-app-setup.md) - Android App
+- [System Architecture](./documentations/AUFondue%20-%20System%20Architecture.png) - Architecture Diagram
 
 ## Deployment
 
@@ -127,5 +127,5 @@ This project is part of AU Fondue, a Senior project - 1 & 2 at Assumption Univer
 
 ## Contact
 For questions or support, contact the development team:
-- Developer/Contributor : [ Sai Oan Hseng Hurk ]
+- Developer/Contributor : [ Sai Oan Hseng Hurk, Min Thant Win]
 - Team : [ UniMend ] 
