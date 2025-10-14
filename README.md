@@ -93,9 +93,20 @@ OpenAPI documentation available at: `http://localhost:8080/swagger-ui.html`
 - Azure Blob Storage for secure file storage
 
 ## Related Documentation
-- [Frontend Setup](./documentations/developer/frontend-setup.md) - Next.js Dashboard
-- [Mobile App Setup](./documentations/developer/mobile-app-setup.md) - Android App
-- [System Architecture](./documentations/AUFondue%20-%20System%20Architecture.png) - Architecture Diagram
+
+### Developer Documentation
+- [Backend Setup](./documentations/developer/backend-setup.md) - Spring Boot API Setup
+- [Frontend Setup](./documentations/developer/frontend-setup.md) - Next.js Dashboard Setup
+- [Mobile App Setup](./documentations/developer/mobile-app-setup.md) - Android App Setup
+- [Swagger Setup](./documentations/SWAGGER_SETUP.md) - API Documentation Setup
+
+### User Documentation
+- [Mobile App Guide](./documentations/user/01-mobile-app-guide.md) - For users reporting issues
+- [Admin Dashboard Guide](./documentations/user/02-admin-dashboard-guide.md) - For administrators
+- [Staff Dashboard Guide](./documentations/user/03-staff-dashboard-guide.md) - For staff members
+
+### System Architecture
+- [Architecture Diagram](./documentations/AUFondue%20-%20System%20Architecture.png) - System overview
 
 ## Deployment
 
