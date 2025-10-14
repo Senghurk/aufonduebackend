@@ -41,6 +41,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "https://au-fondue-web.vercel.app",
             "http://localhost:3000",
+            "https://aufondue.vercel.app",
+            "https://life.au.edu",
             "http://localhost:3001",
             "https://aufondue-backend.kindisland-399ef298.southeastasia.azurecontainerapps.io"
         ));

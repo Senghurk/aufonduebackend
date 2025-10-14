@@ -34,6 +34,8 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/aufondue_db
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
+3. Add Firebase service account JSON to `src/main/resources/firebase-service-account.json`
+4. Configure Azure Blob Storage connection string in `application.properties`
 
 ### Building the Project
 ```bash
@@ -47,34 +49,53 @@ mvn spring-boot:run
 The application will start on `http://localhost:8080`
 
 ## API Documentation
-After starting the application, access the Swagger UI documentation at:
-`http://localhost:8080/swagger-ui.html`
+OpenAPI documentation available at: `http://localhost:8080/swagger-ui.html`
 
 ## Key Features
-- Issue management (CRUD operations)
-- Photo upload and storage
-- Geolocation-based issue tracking
-- User authentication and authorization
-- Real-time notifications (planned)
+- Issue management with photo/video uploads
+- Azure Blob Storage for media files
+- Firebase Authentication
+- Admin and Staff role management
+- Multi-language support
 
 ## API Endpoints
 
-### Issues
-- `POST /api/issues` - Create a new issue report
-- `GET /api/issues` - Get all issues
-- `GET /api/issues/{id}` - Get issue by ID
-- `PUT /api/issues/{id}` - Update an issue
-- `DELETE /api/issues/{id}` - Delete an issue
-- `GET /api/issues/nearby` - Get issues near a location
+### Authentication
+- `POST /api/auth/login` - Login with email/password
+- `POST /api/auth/reset-password` - Reset password
+
+### Issues (User)
+- `POST /api/issues` - Create issue with photos/videos
+- `GET /api/issues/user/{userId}/submitted` - Get user's submitted issues
+
+### Admin
+- `GET /api/admin/issues` - Get all issues
+- `PUT /api/admin/issues/{id}/assign` - Assign issue to staff
+- `GET /api/admin/users` - Get all users
+- `POST /api/admin/users` - Create staff account
+
+### Staff
+- `GET /api/staff/assigned` - Get assigned issues
+- `PUT /api/staff/issues/{id}/status` - Update issue status
+- `POST /api/staff/issues/{id}/remark` - Add remark to issue
+
+## Database Schema
+- `admin` - Admin accounts
+- `staff` - Staff accounts
+- `issue` - Reported facility issues
+- `issue_update` - Status updates and remarks
+- `attachment` - Photo/video files metadata
 
 ## Security
-The application uses Spring Security with the following features:
-- CORS configuration
-- CSRF protection (disabled for development)
-- Stateless session management
-- Azure Active Directory integration (planned)
+- Firebase Authentication for user verification
+- Spring Security for API protection
+- CORS enabled for frontend access
+- Azure Blob Storage for secure file storage
 
-## Development Guidelines
+## Related Documentation
+- [Frontend Setup](../documentations/developer/frontend-setup.md) - Next.js Dashboard
+- [Mobile App Setup](../documentations/developer/mobile-app-setup.md) - Android App
+- [System Architecture](../documentations/AUFondue%20-%20System%20Architecture.png) - Architecture Diagram
 
 ## Deployment
 
@@ -102,7 +123,7 @@ docker run -p 8080:8080 aufondue-backend
 5. Create a Pull Request
 
 ## License
-This project is part of AU Fondue, a Senior project - 1 at Assumption University.
+This project is part of AU Fondue, a Senior project - 1 & 2 at Assumption University.
 
 ## Contact
 For questions or support, contact the development team:

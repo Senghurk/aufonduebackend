@@ -5,6 +5,12 @@ import au.edu.aufonduebackend.model.dto.response.ApiResponse;
 import au.edu.aufonduebackend.model.dto.response.IssueResponse;
 import au.edu.aufonduebackend.service.IssueService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +23,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/issues")
 @RequiredArgsConstructor
+@Tag(name = "Issues", description = "Issue management endpoints")
 public class IssueController {
 
     private final IssueService issueService;
     private final ObjectMapper objectMapper;
 
+    @Operation(summary = "Create a new issue", description = "Submit a new facility issue with optional photos and videos")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Issue created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse<IssueResponse>> createIssue(
             @RequestPart("issue") String issueJson,
@@ -38,12 +50,13 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Get user's submitted issues", description = "Retrieve all issues submitted by a specific user")
     @GetMapping("/user/{userId}/submitted")
     public ResponseEntity<ApiResponse<List<IssueResponse>>> getUserSubmittedIssues(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String status) {
+            @Parameter(description = "User ID") @PathVariable Long userId,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Filter by status") @RequestParam(required = false) String status) {
         List<IssueResponse> issues = issueService.getUserSubmittedIssues(userId, page, size, status);
         return ResponseEntity.ok(ApiResponse.success(issues, "User submitted issues retrieved successfully"));
     }
